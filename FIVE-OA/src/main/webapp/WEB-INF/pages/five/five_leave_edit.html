@@ -1,0 +1,348 @@
+<!-- Horizontal Form -->
+ <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">请假条</h3>
+      </div>
+      <!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal">
+        <div class="box-body">
+          <div class="form-group">
+            <label for="leaveId" class="col-sm-2 control-label">请假原因</label>
+            <div class="col-sm-5">
+	              <select id="leaveId" id="leaveId" class="form-control">
+						 <option>请选择</option>
+				  </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveReason" class="col-sm-2 control-label">请假内容</label>
+            <div class="col-sm-5">
+              <textarea class="form-control" rows="3" id="leaveReason"></textarea>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveStartTime" class="col-sm-2 control-label">请假开始时间</label>
+            <div class="col-sm-5">
+               <input id="leaveStartTime" class="form-control Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'%y-%M-%d'})" type="text" >
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveEndTime" class="col-sm-2 control-label">请假结束时间</label>
+              <div class="col-sm-5">
+              <input id="leaveEndTime" class="form-control Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d'})" type="text" >
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">附件上传</label>
+            <div class="col-sm-5">
+              <input type="file" class="input file" id="fj" multiple="multiple" onchange="ajaxFileUploads(this,'upload/uploadFiles.do')"  name="files">
+           	  <input type="hidden" id="leaveAnnexName">
+           	  <input type="hidden" id="leaveAnnexPath">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveAnnex" class="col-sm-2 control-label">附件列表</label>
+            <div class="col-sm-7" id="Annex">
+         
+            </div>
+          </div>
+        </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+          <button type="button" class="btn btn-default btn-cancel">Cancel</button>
+          <button type="button" class="btn btn-info pull-right btn-save">Save</button>
+        </div>
+        <!-- /.box-footer -->
+      </form>
+    </div>
+	<script type="text/javascript" src="bower_components/My97DatePicker/4.8/WdatePicker.js"></script>
+	<script type="text/javascript" src="bower_components/jquery/src/ajaxfileupload.js"></script>
+<script type="text/javascript">
+ $(document).ready(function(){
+	 doSelect();
+	 $(".box-footer")
+	 .on("click",".btn-cancel",doCancel)
+	 .on("click",".btn-save",doSaveOrUpdate);
+	 var id=$(".container-fluid").data("id");
+	 if(id)doFindObjectById(id);
+ });
+
+ //查询option
+ function doSelect(){
+	 var index =  layer.load(1, {content:'',shade: [0.3, '#393D49']});
+	 $.ajax({
+			url:"fiveLeave/doLeaveDictionaryList.do",
+			type:"post",
+			dataType:"json",
+			async:false, 
+			data:{},
+			success:function(data){
+				if(data.state==1){
+					doSeleclOption(data.data);
+					 layer.close(index);
+				}
+			},
+			error:function(data){
+				 layer.close(index);
+			}
+		});
+ }
+ 
+ function doCancel(){
+	$(".container-fluid")
+	.load("fiveLeave/LeaveUI.do");
+	$(".container-fluid").removeData("id");
+ }
+ function doSaveOrUpdate(){
+	 var id=$(".container-fluid").data("id");
+	 //1.获取表单数据
+	 var params=getEditFormData();
+	 if(id)params.id=id;
+	 //2.发起异步请求
+	 var insertUrl="fiveLeave/doSaveObject.do";
+	 var updateUrl="fiveLeave/doUpdateObject.do";
+	 var url=id?updateUrl:insertUrl;
+
+	 $.post(url,params,function(result){
+		 if(result.state==1){
+			 layer.msg(result.message);
+			 doCancel();
+		 }else{
+			 layer.msg(result.message);
+		 }
+	 })
+ }
+ function getEditFormData(){
+	 //获取用户输入的数据
+	 var params={
+		leaveId:$('#leaveId option:selected').val(),
+		leaveReason:$("#leaveReason").val(),
+		leaveStartTime:$("#leaveStartTime").val(),
+		leaveEndTime:$("#leaveEndTime").val(),
+		leaveAnnexName:$("#leaveAnnexName").val(),
+		leaveAnnexPath:$("#leaveAnnexPath").val(),
+	 }
+	
+	 return params;
+ }
+ 
+ 
+//转化时间格式
+function timestampToTime(timestamp) {
+	if(timestamp == 'null'){
+		return "null";
+	}
+   var date = new Date();
+   date.setTime(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+   Y = date.getFullYear() + '-';
+   M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+   D = date.getDate() + ' ';
+   h = date.getHours() + ':';
+   m = date.getMinutes() + ':';
+   s = date.getSeconds(); 
+   return Y+M+D+h+m+s;
+}
+ 
+ 
+ //根据id查询
+ function doFindObjectById(id){
+	 var url="fiveLeave/doFindObjectById.do";
+	 var params={"id":id}
+	 $.getJSON(url,params,function(result){
+		 if(result.state==1){
+			doInitFormData(result.data);
+		 }else{
+			 layer.msg(result.message);
+		 }
+	 })
+ }
+ 
+ function doInitFormData(data){
+	 //初始化用户信息 
+	 $("#leaveReason").val(data.leaveReason);
+	 $("#leaveStartTime").val(timestampToTime(data.leaveStartTime));
+	 $("#leaveEndTime").val(timestampToTime(data.leaveEndTime));
+	 $("#leaveAnnexName").val(data.leaveAnnexName);//附件名字
+	 $("#leaveAnnexPath").val(data.leaveAnnexPath);//附件路径
+	 
+		var leaveId = data.leaveId;
+	    var option = $('#leaveId option');
+		option.each(function(){
+			if($(this).val()==leaveId){
+				$(this).prop("selected",true);
+			}
+		})
+	if($("#leaveAnnexPath").val()!=""){
+	additionalFilesShows($("#leaveAnnexPath").val().split(","),$("#leaveAnnexName").val().split(","),1,"Annex"); 
+	}
+ }
+ 
+ 
+ function doSeleclOption(data){
+	 var div=$("#leaveId");
+	 for(var i in data){
+		 var option = "<option value='"+data[i].id+"'>"+data[i].leaveCause+"</option>";
+		 div.append(option);
+	 }
+ }
+ 
+//上传方法 
+function ajaxFileUploads(e, url) {
+	//判断上传文件的大小
+	 var addImags =$(e).prop('files');
+	 var fileSize=0;
+     for(var i=0;i<addImags.length;i++){
+	      fileSize=$(addImags)[i].size; 
+	      if(fileSize>104857600){
+	    	  layer.msg("文件超过默认大小(10MB)");
+	        return;
+	      }
+     }
+    var index =  layer.load(1, {content:'',shade: [0.3, '#393D49']});
+	//执行文件上传
+	var id = $(e).attr('id');
+	$.ajaxFileUpload({
+		url : url,
+		secureuri : false,
+		fileElementId : id,
+		dataType : 'json',
+		success : function(data) // 服务器成功响应处理函数
+		{
+			if(data.state==1){
+				if(data.data.fail==1){
+					layer.msg(data.data.leaveAnnexName+"   文件名中包含\"  ,   \"不能上传！",{time:5000});
+					layer.close(index);
+					return;
+				}
+				layer.msg("上传成功！");
+				var path = data.data.listServerPath;
+				var name = data.data.listFileName;
+				if($('#leaveAnnexPath').val()==""){
+					$('#leaveAnnexPath').val(path);
+					$('#leaveAnnexName').val(name);
+				}else{
+					$("#leaveAnnexPath").val($("#leaveAnnexPath").val()+","+path);	
+					$("#leaveAnnexName").val($("#leaveAnnexName").val()+","+name);	
+				}
+				var paths = $('#leaveAnnexPath').val().split(",");
+				var names = $('#leaveAnnexName').val().split(",");	
+				additionalFilesShows(paths,names,1,"Annex"); 
+				layer.close(index);
+			}
+		},
+		error : function() {
+			layer.msg("上传失败！");
+			layer.close(index);
+		}
+	});
+	return false;
+} 
+
+//判断文件的大小
+function maxUpload(addImags){
+    var fileSize=0;
+    for(var i=0;i<addImags.length;i++){
+	      fileSize=$(addImags)[i].size; 
+	      if(fileSize>10485760){
+	    	  layer.msg("文件超过默认大小(10MB)");
+	        return;
+	      }
+    }
+}
+
+
+//上传列表展示
+function additionalFilesShows(paths,names,type,id,e){
+	 	for(var i=0;i<names.length;i++){
+		var name=names[i].substring(names[i].lastIndexOf('.')+1,names[i].length);//获取每个文件的后缀名
+			name=name.toLowerCase();
+		if(name=="doc" || name=="docx"|| name=="dot"|| name=="dotx"|| name=="docm"|| name=="dotm"){
+			showType(paths[i],names[i],"word",type,id,i,e);
+		}else if(name=="xls" || name=="xlsx"|| name=="xlsm"|| name=="xltx"|| name=="xltm"|| name=="xlsb" ){
+			showType(paths[i],names[i],"excel",type,id,i,e);
+		}else if(name=="pdf"){
+			showType(paths[i],names[i],"pdf",type,id,i,e);
+		}else if(name=="png" || name=="jpg" || name=="jpeg" || name=="ico" || name=="gif" || name=="raw"|| name=="tif" || name=="tiff"|| name=="bmp"){
+			showType(paths[i],names[i],"image",type,id,i,e);
+		}else if(name=="ppt" || name=="pptx"|| name=="pptm"|| name=="potx"|| name=="pptm"|| name=="ppam"){
+			showType(paths[i],names[i],"ppt",type,id,i,e);
+		}else if(name=="rar" || name=="zip" || name=="7z"){
+			showType(paths[i],names[i],"winrar",type,id,i,e);
+		}else{
+			showType(paths[i],names[i],"others",type,id,i,e);
+		}
+	
+	}
+}
+
+
+//要加载什么样的类型
+function showType(path,name,imageName,type,id,deleteNum){
+	var html="";
+	
+	html+="<div class='maskWraper col-xs-2 pd-10 old' >";
+	if(imageName=="image"){
+		//html+="<img src="+'F:/'+path+" width='80' height='50' class='col-xs-12 radius'>";
+		html+="<img src="+path+" width='80' height='50' class='col-xs-12 radius'>";
+	}else{
+		html+="<img src='bower_components/images/"+imageName+".ico' class='col-xs-12 radius'>";
+	}
+    html+="<div class='maskBar text-cc'>";
+    html+="<form   action='upload/download.do' style='float:left;' meth='post'>";
+    html+="<input type='hidden' value='"+path+"' name='leaveAnnexPath' >";
+    if(type==1){
+	    html+="<a class='btn-link' href='javascript:;'  onclick='fileDownLoad(this)' style='position:relative;left:0px;' >下载</a>";
+	    html+="</form>";    	    
+	   	html+="<a class='btn-link' href='javascript:deleteFile("+deleteNum+","+deleteNum+")' style='margin-left:10px;'>删除</a>"; 
+    }
+    else{
+    	html+="<a class='btn-link' href='javascript:;'  onclick='fileDownLoad(this)' style='position:relative;left:35px;text-algin:center;' >下载</a>";
+	    html+="</form>";
+    }
+	html+="</div>";
+	html+="<div class='text'>";
+	if(name.length>7){
+		html+=name.substring(0,6)+"..."+name.substring(name.lastIndexOf('.'),name.length);
+	}else{
+		html+=name;
+	}
+	html+="</div>";
+	html+="</div>";
+	$("#"+id).append(html);
+}
+
+//附件下载
+function fileDownLoad(e){
+	$(e).parent("form").submit();
+}
+
+//执行删除操作
+function  deleteFile(path,name){
+	var arrPath = $('#leaveAnnexPath').val().split(",");
+	var arrName = $('#leaveAnnexName').val().split(",");
+	arrPath.splice(path,1);
+	arrName.splice(name,1);
+	$('#leaveAnnexPath').val(arrPath);
+	$('#leaveAnnexName').val(arrName);
+	
+	$("#Annex").empty();
+	var paths = $('#leaveAnnexPath').val().split(",");
+	var names = $('#leaveAnnexName').val().split(",");
+	if(names!=""){
+		layer.msg("删除成功!");
+		additionalFilesShows(paths,names,1,"Annex");
+	}else{
+		layer.msg("删除成功!");
+	}
+	
+}
+
+</script>
+    
+    
+    
+    
+    
+    
+    

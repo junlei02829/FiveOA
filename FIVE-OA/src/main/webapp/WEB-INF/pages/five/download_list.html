@@ -1,0 +1,211 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">文件操作</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="角色名">
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div>
+				<span style="float: right; margin-right: 1.5%">
+					<button type="button" id="downloadExcel"
+						Style="margin-right: 1.5%; background-color: 3C8DBC"
+						class="btn btn-primary" data-btn-type="selectIcon">
+						<i class="fa fa-mail-forward">&nbsp;下载全部</i>
+					</button>
+				</span>
+			</div>
+			<div class="box-body table-responsive no-padding">
+				<form>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th align="center" width="20%"><input type="checkbox"
+									id="checkAll">全选</th>
+								<th align="center" width="60%">名称</th>
+								<th align="center" width="20%">下载</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyId">
+						</tbody>
+					</table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix"></div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+	$(function() {
+		//异步加载
+		doGetObjects();
+
+		//执行全选
+		$("#checkAll").change(function() {
+			doCheckAll($(this).prop("checked"));
+		});
+
+		//执行全部下载操作
+		$("#downloadExcel").click(function() {
+			if (confirm("是否确认批量下载?")) {
+				doLoadAll();
+			}
+			
+		})
+
+	});
+
+	function doLoadAll() {
+		var ids = doGetCheckedIds();
+		//confirm(ids)
+		if(ids.length>5){
+			alert("请选择少于5个!");
+			return;
+		}
+			var url =[];
+		for (var i in ids) {
+			//doLoad(ids[i]);
+			url.push("downLoad/downLoadUI.do?tableName=" + ids[i]);
+		} 
+		for (var i in url) {
+			download(ids[i], url[i]);
+		} 
+	}
+
+	//实现批量下载
+	  function download(name, href) {
+	      var a = document.createElement("a"), //创建a标签
+	          e = document.createEvent("MouseEvents"); //创建鼠标事件对象
+	      e.initEvent("click", false, false); //初始化事件对象
+	      a.href = href; //设置下载地址
+	      a.download = name; //设置下载文件名
+	      a.dispatchEvent(e); //给指定的元素，执行事件click事件
+	  }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/* 以下为全选操作 */
+
+	//执行全选操作(让列表中的checkbox的状态与表头中checkbox状态一致)
+	function doCheckAll(state) {
+		$("tbody input[name='checkItem']").prop("checked", state);
+	}
+
+	//当点击列表中某一个checkbox时，修改全选状态
+	function doChangeCheckAllState() {
+		var flag = true;
+		$("tbody input[name='checkItem']").each(function() {
+			flag = flag & $(this).prop("checked");
+		});
+		$("#checkAll").prop("checked", flag);
+	}
+
+	//获取选中的id值
+	function doGetCheckedIds() {
+		var array = [];
+		$("tbody input[name='checkItem']").each(function() {
+			if($(this).prop("checked")) {
+				array.push($(this).val());
+			}
+		});
+		
+		return array;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/* 以下为单按钮下载 */
+
+	//获取被点击按钮得value值
+	function getValue(val) {
+		if (confirm("是否确认下载?")) {
+			location.href = "downLoad/downLoadUI.do?tableName=" + val;
+		}
+	}
+
+	function doGetObjects() {
+		$.ajax({
+			url : "downLoad/findAllTableName.do",
+			dataType : "json",
+			async : false,
+			success : function(result) {
+				if (result.state == 1) {
+					setTableBodyRows(result.data)
+				} else {
+					alert(result.message);
+				}
+			}
+		});
+
+	}
+
+	function setTableBodyRows(data) {
+		//1.获取body对象
+		var tBody = $("#tbodyId");
+		tBody.empty();
+		//2.迭代data，将data添加到Body中
+		for ( var i in data) {
+			var tr = $("<tr></tr>");
+			//tr对象上绑定一个id值(唯一标识这行记录)
+			//tr.data("id",data[i].id);
+			var name = data[i].table_name;
+			var tds = "<td><input type='checkbox' name='checkItem' value='"+name+"'></td>"
+					+ "<td>"
+					+ name
+					+ "</td>"
+					+ "<td><button type='button' class='btn btn-gray' onclick='getValue(this.value)' value='"
+					+ name + "'>&nbsp;下载</button></td>"
+			/*  name+ "'><i class='fa fa-mail-forward'>&nbsp;下载</i></button></td>"     onclick='getValue(this.value)'*/
+			tr.append(tds);
+			tBody.append(tr);
+		}
+		//每个checkbox上注册一个click事件
+		$("tbody input[name='checkItem']")
+		   .click(doChangeCheckAllState);
+	}
+</script>
+
+
+

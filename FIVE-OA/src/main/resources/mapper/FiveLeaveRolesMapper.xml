@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.FiveLeaveRolesDao">
+
+
+	<resultMap type="com.five.common.vo.FiveLeaveRoles" id="fiveLeaveRoles">
+		<id property="id" column="id" />
+		<!-- 用户名 -->
+		<result property="roleName" column="role_name" />
+	</resultMap>
+
+	<!-- 查询用户的角色名 -->
+	<select id="findRoleName" resultMap="fiveLeaveRoles">
+		select fr.role_name role_name FROM five_users fu LEFT JOIN five_user_role fur ON fu.id=fur.user_id
+		LEFT JOIN five_role fr ON fr.id=fur.role_id where fu.id=#{id}
+	</select>
+	
+
+</mapper>
+
+
+

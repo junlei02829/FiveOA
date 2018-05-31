@@ -1,0 +1,23 @@
+package com.five.common.exception;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.five.common.util.JsonResult;
+
+
+
+@ControllerAdvice
+public class ExceptionController {
+
+	  @ExceptionHandler(ServiceException.class)
+	  @ResponseBody
+	  public JsonResult handleServiceException(
+			  RuntimeException e){
+		  e.printStackTrace();
+		  //封装错误信息
+		  return new JsonResult(e);
+	  }
+	
+}

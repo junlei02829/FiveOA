@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.LeaveDictionaryDao">
+
+
+	 <resultMap type="com.five.entity.LeaveDictionary" id="leaveDictionarys">  
+			<id property="id" column="id" />
+			<!-- 请假内容 -->
+			<result property="leaveCause" column="leave_cause" />
+			<!-- 创建时间 -->
+			<result property="createTime" column="create_time"/>  
+			<!-- 修改时间 -->
+			<result property="updateTime" column="update_time"/>
+			<!-- 备注 -->
+			<result property="remark" column="remark"/>  
+			<!--删除标识 -->
+			<result property="deleteFlag" column="delete_flag"/>  
+	  </resultMap>  
+	  
+	  <select id="doFindLeaveDictionary" resultMap="leaveDictionarys">
+	  	select id,leave_cause from five_leave_dictionary where id=#{id}
+	  </select>
+	  
+	  <select id="doFindLeaveDictionaryList" resultMap="leaveDictionarys">
+	  	select id,leave_cause from five_leave_dictionary 
+	  </select>
+	  
+
+</mapper>
+
+
+

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.FiveUserDao">
+
+	<!-- 主要是石军磊写，下面部分玄今男 -->
+	<resultMap type="com.five.entity.FiveUser" id="fiveUser2">
+		<!-- ID -->
+		<id property="id" column="id" />
+		<!-- 用户名 -->
+		<result property="username" column="username" />
+		<!--密码 -->
+		<result property="password" column="password" />
+		<!-- 盐值 -->
+		<result property="salt" column="salt" />
+		<!-- 手机号 -->
+		<result property="phone" column="phone" />
+		<!-- 邮箱 -->
+		<result property="email" column="email" />
+		<!-- 状态 -->
+		<result property="type" column="type" />
+		<!--删除标识 -->
+		<result property="deleteFlag" column="delete_flag" />
+		<!-- 创建时间 -->
+		<result property="createTime" column="create_time" />
+		<!-- 修改时间 -->
+		<result property="updateTime" column="update_time" />
+		<!-- 创建人 -->
+		<result property="createName" column="create_name" />
+		<!-- 修改人 -->
+		<result property="updateName" column="update_name" />
+
+	</resultMap>
+	<!-- <sql id="pageWhere"> <where> <if test="username!=null and username 
+		!=''"> username like concat("%",#{username},"%") and </if> </where> </sql> -->
+
+	<!-- 查询所有用户记录 -->
+	<select id="findObjects" resultType="fiveUser">
+		select *
+		from five_users
+		where delete_flag=1
+	</select>
+
+
+	<!-- 基于ID删除用户 -->
+	<update id="deleteObjectById">
+		update five_users set delete_flag=0
+		<where>
+			id=#{id}
+		</where>
+	</update>
+
+
+	<!-- 基于id查询用户 -->
+	<select id="findObjectById" resultType="fiveUser">
+		select *
+		from five_users
+		where id=#{id}
+	</select>
+
+	<!-- 添加用户数据 -->
+	<insert id="insertObject" parameterType="fiveUser"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into five_users
+		(username,password,salt,phone,email,type,delete_flag,create_time,update_time,
+		create_name,update_name
+		)
+		values
+		(#{username},#{password},#{salt},#{phone},#{email},#{type},#{delete_flag},
+		now(),now(),#{create_name},#{update_name})
+	</insert>
+
+	<!-- 基于ID修改用户状态 -->
+	<update id="updateTypeById">
+		update five_users set type=#{type}
+		<where>
+			id=#{id}
+		</where>
+	</update>
+
+	<!-- 基于username查询用户 -->
+	<select id="findObjectByName" resultType="fiveUser">
+		select *
+		from five_users
+		where username like concat("%",#{username},"%")
+	</select>
+
+	<!-- 基于id修改数据 -->
+	<update id="updateObject" parameterType="fiveUser">
+
+		update five_users
+		<set>
+			<if test="username!=null and username!=''">
+				username=#{username},
+			</if>
+
+			<if test="password!=null and password!=''">
+				password=#{password},
+			</if>
+
+			<if test="email!=null and email!=''">
+				email=#{email},
+			</if>
+
+			<if test="phone!=null and phone!=''">
+				phone=#{phone},
+			</if>
+
+			update_time=now()
+
+		</set>
+		where id=#{id}
+
+	</update>
+	<!-- ****************************下面是玄今男*********************** -->
+
+
+
+
+	<!-- 查找菜单权限 -->
+	<select id="findFiveUserPermissions" resultType="string">
+		select
+		m.permission from
+
+		five_area a join
+
+		five_area_department ad join
+
+		five_user_department ud join
+
+		five_user_role ur join
+
+		five_menu_role mr
+		join
+
+		five_menus m
+
+		on
+
+		a.id=ad.area_id and
+
+		ad.department_id=ud.department_id and
+
+		ud.user_id=ur.user_id and
+
+		ur.role_id=mr.role_id and
+
+		mr.menu_id=m.id
+
+		where ur.user_id=#{id}
+
+	</select>
+
+	<select id="findFiveUserByUserName" resultType="fiveUser">
+		select * from
+		five_users where username=#{username}
+	</select>
+
+
+
+
+	<resultMap type="com.five.entity.FiveEntityForZTree"
+		id="fiveEntityForZTree2">
+		<result property="id" column="id" />
+		<result property="name" column="username" />
+
+	</resultMap>
+
+	<select id="findAllUsers" resultMap="fiveEntityForZTree2">
+		select * from five_users
+	</select>
+
+	<select id="findIdByName" resultType="fiveUser">
+		select * from five_users where username=#{username}
+	</select>
+
+
+
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

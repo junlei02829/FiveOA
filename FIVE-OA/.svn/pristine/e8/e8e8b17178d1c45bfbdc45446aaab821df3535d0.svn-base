@@ -1,0 +1,26 @@
+package com.five.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ * 进入住页面
+ * @author lizhichao
+ *
+ */
+@RequestMapping("/")
+@Controller
+public class IndexController {
+	
+	@RequestMapping("indexUI")
+	public String indexUI() {
+		return "starter";
+	}
+
+	
+	@RequestMapping("pageUI")
+	public String pageUI() {
+		return "common/page";
+	}
+}
+

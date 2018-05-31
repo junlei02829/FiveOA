@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.FiveLeaveDao">
+
+
+	<resultMap type="com.five.entity.FiveLeave" id="fiveLeaves">
+		<id property="id" column="id" />
+		<!-- 用户名 -->
+		<result property="username" column="username" />
+		<!-- 请假字典id -->
+		<result property="leaveId" column="leave_id" />
+		<!-- 阅读权限 -->
+		<result property="readAuthority" column="read_authority" />
+		<!-- 请假内容 -->
+		<result property="leaveReason" column="leave_reason" />
+		<!-- 请假附件名字 -->
+		<result property="leaveAnnexName" column="leave_annex_name" />
+		<!-- 请假附件下载路径 -->
+		<result property="leaveAnnexPath" column="leave_annex_path" />
+		<!-- 备注 -->
+		<result property="remark" column="remark" />
+		<!--删除标识 -->
+		<result property="deleteFlag" column="delete_flag" />
+		<!-- 请假开始时间 -->
+		<result property="leaveStartTime" column="leave_start_time" />
+		<!-- 请假结束时间 -->
+		<result property="leaveEndTime" column="leave_end_time" />
+		<!-- 创建时间 -->
+		<result property="createTime" column="create_time" />
+		<!-- 修改时间 -->
+		<result property="updateTime" column="update_time" />
+		<result property="userId" column="user_id" />
+	</resultMap>
+
+
+	<sql id="pageWhere">
+		<if test="username!=null and username !=''">
+			and username like concat("%",#{username},"%")
+		</if>
+	</sql>
+	<select id="findPageObjects" resultMap="fiveLeaves">
+		select *
+		from five_leave
+		where delete_flag=1
+		<include refid="pageWhere" />
+		order by create_time desc
+	</select>
+	<select id="getRowCount" resultType="int">
+		select count(*) from five_leave where delete_flag=1
+		<include refid="pageWhere" />
+	</select>
+
+	<select id="findList" resultMap="fiveLeaves">
+		select * from five_leave where
+		delete_flag=1
+	</select>
+
+
+	<insert id="insertObject" parameterType="fiveLeave">
+		insert into
+		five_leave
+		(leave_id,leave_reason,leave_annex_name,leave_annex_path,leave_start_time,
+		leave_end_time,create_time,update_time,username,remark)
+		values
+		(#{leaveId},#{leaveReason},#{leaveAnnexName},#{leaveAnnexPath},#{leaveStartTime},#{leaveEndTime},
+		now(),now(),#{username},#{remark})
+	</insert>
+
+
+	<select id="doFindObjectById" resultMap="fiveLeaves">
+		select * from five_leave
+		where delete_flag=1 and id=#{id}
+	</select>
+
+
+	<update id="updateObject">
+		update five_leave
+		<set>
+			<if test="leaveReason!=null and leaveReason!='' ">
+				leave_reason=#{leaveReason},
+			</if>
+			<if test="leaveAnnexName!=null and leaveAnnexName!='' ">
+				leave_annex_name=#{leaveAnnexName},
+			</if>
+			<if test="leaveAnnexPath!=null and leaveAnnexPath!='' ">
+				leave_annex_path=#{leaveAnnexPath},
+			</if>
+			<if test="leaveStartTime!=null and leaveStartTime!='' ">
+				leave_start_time=#{leaveStartTime},
+			</if>
+			<if test="leaveEndTime!=null and leaveEndTime!='' ">
+				leave_end_time=#{leaveEndTime},
+			</if>
+			<if test="username!=null and username!='' ">
+				username=#{username},
+			</if>
+			<if test="remark!=null and remark!='' ">
+				remark=#{remark},
+			</if>
+			<if test="leaveId!=null and leaveId!='' ">
+				leave_id=#{leaveId},
+			</if>
+			update_time=now()
+		</set>
+		where id=#{id}
+	</update>
+
+	<!-- 修改驳回信息 -->
+	<update id="updateRemark" parameterType="fiveLeave">
+		update five_leave
+		<set>
+			<if test="remark!=null and remark!='' ">
+				remark=#{remark},
+			</if>
+				read_authority=#{readAuthority},
+			update_time=now()
+		</set>
+		where id=#{id}
+	</update>
+
+	<!-- 修改审核状态 -->
+	<update id="updateAuthority"  parameterType="fiveLeave">
+		update five_leave
+		<set>
+			<if test="remark!=null and remark!='' ">
+				remark=#{remark},
+			</if>
+				read_authority=#{readAuthority},
+			update_time=now()
+		</set>
+		where id=#{id}
+	</update>
+	
+
+</mapper>
+
+
+

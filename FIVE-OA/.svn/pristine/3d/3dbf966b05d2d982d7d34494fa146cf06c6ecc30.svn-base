@@ -1,0 +1,194 @@
+<!-- Horizontal Form -->
+ <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">请假条</h3>
+      </div>
+      <!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal">
+        <div class="box-body">
+          <div class="form-group">
+            <label for="leaveId" class="col-sm-2 control-label">请假原因</label>
+            <div class="col-sm-5">
+	              <select id="leaveId" id="leaveId" class="form-control">
+						 <option>请选择</option>
+				  </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveReason" class="col-sm-2 control-label">请假内容</label>
+            <div class="col-sm-5">
+              <textarea class="form-control" rows="3" id="leaveReason"></textarea>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveStartTime" class="col-sm-2 control-label">请假开始时间</label>
+            <div class="col-sm-5">
+               <input id="leaveStartTime" class="form-control Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'%y-%M-%d'})" type="text" >
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveEndTime" class="col-sm-2 control-label">请假结束时间</label>
+              <div class="col-sm-5">
+              <input id="leaveEndTime" class="form-control Wdate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d'})" type="text" >
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="leaveAnnex" class="col-sm-2 control-label">附件上传</label>
+            <div class="col-sm-5" id="leaveAnnex">
+              
+            </div>
+          </div>
+        </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+          <button type="button" class="btn btn-default btn-cancel">Cancel</button>
+          <button type="button" class="btn btn-info pull-right btn-save">Save</button>
+        </div>
+        <!-- /.box-footer -->
+      </form>
+    </div>
+	<script type="text/javascript" src="bower_components/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript">
+ $(document).ready(function(){
+	 doSelect();
+	 $(".box-footer")
+	 .on("click",".btn-cancel",doCancel)
+	 .on("click",".btn-save",doSaveOrUpdate);
+	 var id=$(".container-fluid").data("id");
+	 if(id)doFindObjectById(id);
+ });
+
+ function doSelect(){
+	 var index =  layer.load(0, {content:'',shade: [0.3, '#393D49']});
+	 $.ajax({
+			url:"fiveLeave/doLeaveDictionaryList.do",
+			type:"post",
+			dataType:"json",
+			async:true, 
+			data:{},
+			success:function(data){
+				if(data.state==1){
+					doSeleclOption(data.data);
+					 layer.close(index);
+				}
+			},
+			error:function(data){
+				 layer.close(index);
+			}
+		});
+ }
+ 
+ function doCancel(){
+	$(".container-fluid")
+	.load("fiveLeave/LeaveUI.do");
+	$(".container-fluid").removeData("id");
+ }
+ function doSaveOrUpdate(){
+	 var id=$(".container-fluid").data("id");
+	 //1.获取表单数据
+	 var params=getEditFormData();
+	 if(id)params.id=id;
+	 //2.发起异步请求
+	 var insertUrl="fiveLeave/doSaveObject.do";
+	 var updateUrl="fiveLeave/doUpdateObject.do";
+	 var url=id?updateUrl:insertUrl;
+
+	 $.post(url,params,function(result){
+		 if(result.state==1){
+			 alert(result.message);
+			 doCancel();
+		 }else{
+			alert(result.message);
+		 }
+	 })
+ }
+ function getEditFormData(){
+	 //获取用户输入的数据
+	 var params={
+		leaveId:$('#leaveId option:selected').val(),
+		leaveReason:$("#leaveReason").val(),
+		leaveStartTime:$("#leaveStartTime").val(),
+		leaveEndTime:$("#leaveEndTime").val(),
+		leaveAnnex:$("#leaveAnnex").val()
+	 }
+	
+	 return params;
+ }
+ 
+ 
+//转化时间格式
+function timestampToTime(timestamp) {
+	if(timestamp == 'null'){
+		return "null";
+	}
+   var date = new Date();
+   date.setTime(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+   Y = date.getFullYear() + '-';
+   M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+   D = date.getDate() + ' ';
+   h = date.getHours() + ':';
+   m = date.getMinutes() + ':';
+   s = date.getSeconds(); 
+   return Y+M+D+h+m+s;
+}
+ 
+ 
+ 
+ function doFindObjectById(id){
+	 var url="fiveLeave/doFindObjectById.do";
+	 var params={"id":id}
+	 $.getJSON(url,params,function(result){
+		 if(result.state==1){
+			doInitFormData(result.data);
+		 }else{
+			alert(result.message);
+		 }
+	 })
+ }
+ 
+ function doInitFormData(data){
+	 //初始化用户信息 
+	 $("#leaveReason").val(data.leaveReason);
+	 $("#leaveStartTime").val(timestampToTime(data.leaveStartTime));
+	 $("#leaveEndTime").val(timestampToTime(data.leaveEndTime));
+	 $("#leaveAnnex").val(data.leaveAnnex);//附件
+		var leaveId = data.leaveId;
+	    var option = $('#leaveId option');
+		option.each(function(){
+			if($(this).val()==leaveId){
+				$(this).prop("selected",true);
+			}	
+		});
+	 //初始化用户角色信息
+	 var ids=data.roleIds;
+	/*for(var i in ids){
+	  $("#rolesId input[name='roleId']")
+	  .each(function(){
+		  if($(this).val()==ids[i]){
+			  $(this).prop("checked",true);
+		  }
+	  })
+	 } */
+	 for(var i in ids){
+	  $("#rolesId input[value='"+ids[i]+"']") .prop("checked",true);
+	 }
+ }
+ 
+ 
+ function doSeleclOption(data){
+	 var div=$("#leaveId");
+	 for(var i in data){
+		 var option = "<option value='"+data[i].id+"'>"+data[i].leaveCause+"</option>";
+		 div.append(option);
+	 }
+ }
+ 
+</script>
+    
+    
+    
+    
+    
+    
+    

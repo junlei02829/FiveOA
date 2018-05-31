@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.FiveInformationDao">
+
+
+	<resultMap type="com.five.entity.FiveInformation" id="fiveInformations">
+		<id property="id" column="id" />
+		<!-- 发送人 -->
+		<result property="username" column="username" />
+		<!-- 内容 -->
+		<result property="content" column="content" />
+		<!-- (私件/通知)0/1 -->
+		<result property="type" column="type" />
+		<!-- 备注 -->
+		<result property="remark" column="remark" />
+		<!--删除标识 -->
+		<result property="deleteFlag" column="delete_flag" />
+		<!-- 创建时间 -->
+		<result property="createTime" column="create_time" />
+		<!-- 修改时间 -->
+		<result property="updateTime" column="update_time" />
+		<!-- 收件人id -->
+		<result property="receiptId" column="receipt_id" />
+	</resultMap>
+
+
+	<sql id="pageWhere">
+		<if test="username!=null and username !=''">
+			and username like concat("%",#{username},"%")
+		</if>
+	</sql>
+	<select id="findPageObjects" resultMap="fiveInformations">
+		select *
+		from five_information
+		where delete_flag=1 and receipt_id=#{receiptId} or receipt_id=0
+		<include refid="pageWhere" />
+		order by create_time desc
+	</select>
+	<select id="doFindPageObjects" resultMap="fiveInformations">
+		select *
+		from five_information
+		where delete_flag=1 and receipt_id=0
+		<include refid="pageWhere" />
+		order by create_time desc
+	</select>
+	
+	<select id="getRowCount" resultType="int">
+		select count(*) from five_information where delete_flag=1 and receipt_id=#{receiptId} and receipt_id=0
+		<include refid="pageWhere" />
+	</select>
+
+	<insert id="insertObject" parameterType="fiveInformation">
+		insert into
+		five_information
+		(username,content,type,create_time,update_time,receipt_id,remark)
+		values
+		(#{username},#{content},#{type},now(),now(),#{receiptId},#{remark})
+	</insert>
+
+	<select id="doFindObjectById" resultMap="fiveInformations">
+		select * from five_information where delete_flag=1 and id=#{id}
+	</select>
+
+</mapper>
+
+
+

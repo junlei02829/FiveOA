@@ -1,0 +1,306 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">用户管理</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="用户名">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-primary btn-add">添加</button>
+							<button type="button" class="btn btn-success btn-update">修改</button>
+							<button type="button" class="btn btn-info btn-delete">删除</button>
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>用户名</th>
+							<th>邮箱</th>
+							<th>手机号</th>
+							<th>状态</th>
+							<th>创建时间</th>
+							<th>修改时间</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId"></tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix"></div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+  
+	/***********************文档就绪后添加各种事件*****************************/
+  $(function(){
+	  
+	 $("#pageId").load("pageUI.do",function(){
+		 
+		 doGetObjects();
+	 }); 
+	 
+	 $(".input-group-btn")
+	   	.on("click",".btn-search",doQueryObjects )
+	   	.on("click",".btn-add",doLoadEditUI )
+	   	.on("click",".btn-delete",doDeleteObject)
+	   	.on("click",".btn-update",doLoadEditUI)
+	   	
+	   	
+	   	
+	 $("#tbodyId")
+	 	.on("click",".btn-valid",doChangeValid)
+	  
+  });
+	
+	
+	
+  /**********************加载用户编辑页面*************************************/
+	
+  function doLoadEditUI(){
+		 
+		 //1.定义title
+		  var title;
+		  if($(this).hasClass("btn-add")){
+			  
+			  title="添加用户!";
+			  doLoadEdit(title);
+			  
+		  }else{
+			  
+			  title="修改用户!";
+			  var id=doGetCheckedId();
+			 $(".container-fluid").data("id",id);
+		      doLoadEdit(title);
+		  }
+  }
+  
+  /*********************加载编辑页面*************************************/
+  function doLoadEdit(title){
+	  
+		//2.异步加载页面
+		 url = "user/editUI.do";
+		$(".container-fluid").load(url,function(){
+		$(".box-title").html(title);
+		
+		});
+  }
+	
+  /*************************异步加载用户列表数据**********************************/
+  function doGetObjects(){
+	  
+	  //1.定义url
+	  var url="user/doFindObjects.do";
+	 
+	  
+	  //2.定义参数
+	  var pageCurrent=$("#pageId").data("pageCurrent");
+	  if(!pageCurrent)pageCurrent=1
+	  
+	  //var username = $("#searchNameId").val().trim();
+	  
+	  var params={ pageCurrent:pageCurrent,
+			       
+					  }
+	  
+	  $.getJSON(url,params,function(result){
+		  		
+		  if(result.state==1){
+			  
+			  //设置并显示当前页面的用户信息
+			  setTableBodyRows(result.data.list); 
+				//更新分页数据
+			  setPagination(result.data);
+			  
+		  }else{
+			  alert(result.message)
+		  }
+		  
+	  });
+	  
+  }
+  /**********************将数据显示在页面上*************************************/
+  function setTableBodyRows(list){
+	  
+	  //1.获取tbody对象并清空
+	  var tBody=$("#tbodyId");
+	  tBody.empty();
+	  //2.遍历数据集,并将数据填充到tbody中
+
+	  for(var i=0;i<list.length;i++){
+		  //1.构建tr对象
+		 	 var tr = $("<tr></tr>")
+		 	 //绑定数据
+		  	tr.data("id",list[i].id);
+			tr.data("rowData", list[i] );
+			
+		  	//2.构建td对象(拼接字符串)
+			var tds = createdTds(list[i])	
+		 	 //3.将td追加到tr
+		 	 tr.append(tds)
+		 	 //4.将tr追加到tBody上
+		 	 tBody.append(tr)
+	  }
+  }
+  
+  /**********************创建tds*************************************/
+  function createdTds(data){
+	  
+	  var tds="<td><input type='radio' name='checkItem' value='"+data.id+"'/> </td>"+
+	  			"<td>"+	 data.username +"</td>"+
+	  			"<td>"+	 data.email +"</td>"+
+	  			"<td>"+	 data.phone +"</td>"+
+	  			"<td>"+	(data.type?'启用':'禁用')  +"</td>"+
+	  			"<td>"+	 data.create_time +"</td>"+
+	  			"<td>"+	 data.update_time +"</td>"+
+	  			"<td><button type='button'  class='btn btn-info btn-valid'>"+
+	  			(data.type?'禁用':'启用')+"</button></td>";
+	  			return tds;
+  }
+  
+  
+  /******************查询按钮事件处理函数 ************************************/
+  
+  
+  
+	function　doQueryObjects(){
+	   //初始化当前页面的值为1
+	   $("#pageId").data("pageCurrent",1);
+	   //重用doGetObjects方法执行查询
+	   doFindObjectByName();
+	}
+  
+  /*************************************************************************/
+  
+   function  doFindObjectByName(){
+	  
+	  var url="user/findObjectByName.do";
+	  var username=$("#searchNameId").val().trim();
+	  var params={username:username};
+	  
+
+	  $.getJSON(url,params,function(result){
+		  		
+		  if(result.state==1){
+			  
+			  //设置并显示当前页面的用户信息
+			  setTableBodyRows(result.data.list); 
+				//更新分页数据
+			  setPagination(result.data);
+			  
+		  }else{
+			  alert(result.message)
+		  }
+	  });
+	  
+  }
+  
+  
+	  /**********************修改用户的状态************************************/
+	function doChangeValid(){
+		
+		var rowData=$(this).parents("tr").data("rowData");
+	
+		var type=rowData.type?0:1;
+		
+		var btn=$(this);
+		
+		 var url ="user/doUpdateTypeById.do";
+		 var params={id:rowData.id};
+		 params.type=type;
+		 
+		 //3.异步提交数据
+		 $.post(url,params,function(result){
+			 if(result.state==1){
+				 
+				  doEditRow(btn,type);
+				
+			 }else{
+				 alert(result.message)
+			 }
+		 });
+	}
+	  
+	/************************基于id删除用户**************************************/
+	  
+	 function  doDeleteObject(){
+		  
+		url="user/deleteObjectById.do"
+		  
+		var id = doGetCheckedId();
+		 
+		if(id==null){
+			alert("请选择一个用户!!")
+			return;
+		}
+		
+		//alert("######ID######")
+		//alert(id)
+		
+		 var params={id:id}
+		  
+		  $.post(url,params,function(result){
+			  
+			  if(result.state==1){
+				  
+				  doGetObjects();
+				  
+			  }else{
+				  alert(result.message)
+			  }
+		  });
+	  }
+	  
+	 /**********************获取选中的元素*************************************/
+	function doGetCheckedId(){
+		
+		var id;
+		
+		$("#tbodyId input[type='radio']").each(function(){
+			
+			if($(this).prop("checked")){
+			
+				id=$(this).val();
+			}
+		});
+		
+		//alert(id)
+		
+		return id;
+	}
+	
+  /**********************修改行数据*************************************/
+	function doEditRow(btn,type){
+		//1.修改按钮内容
+		btn.html(type?"禁用":"启用");
+		//2.修改td内容
+		var tr=btn.parents("tr");
+		tr.find("td:eq(4)").html(type?"启用":"禁用");
+		//3.重新绑定数据
+		var rowData=tr.data("rowData");
+		rowData.type=type;
+		tr.data("rowData",rowData);
+		
+	}
+  
+  
+</script>
+
+
+
+

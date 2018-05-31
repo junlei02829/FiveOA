@@ -1,0 +1,217 @@
+<!-- Horizontal Form -->
+<div class="box box-info">
+	<div class="box-header with-border">
+		<h3 class="box-title">添加用户</h3>
+	</div>
+	<!-- /.box-header -->
+	<!-- form start -->
+	<form class="form-horizontal">
+		<div class="box-body">
+			<div class="form-group">
+				<label for="usernameId" class="col-sm-2 control-label">用户名</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="usernameId">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="passwordId" class="col-sm-2 control-label">密码</label>
+
+				<div class="col-sm-10">
+					<input type="password" class="form-control" id="passwordId">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="emailId" class="col-sm-2 control-label">邮箱</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="emailId">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="phoneId" class="col-sm-2 control-label">手机号</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="phoneId">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="rolesId" class="col-sm-2 control-label">角色</label>
+				<div class="col-sm-10" id="rolesIds"></div>
+			</div>
+		</div>
+		<!-- /.box-body -->
+		<div class="box-footer">
+			<button type="button" class="btn btn-default btn-cancel">返回页面</button>
+			<button type="button" class="btn btn-info pull-right btn-save">保存用户</button>
+		</div>
+		<!-- /.box-footer -->
+	</form>
+</div>
+<script type="text/javascript">
+
+/**********************文档就绪 加载绑定的事件********************************/
+ $(document).ready(function(){
+	 
+	 doLoadRoles();
+	 $(".box-footer")
+	 .on("click",".btn-cancel",doCancel)
+	 .on("click",".btn-save",doSaveObject)
+	 
+	 var id= $(".container-fluid").data("id");
+	 if(id){ doFindObjectById(); };
+	 
+	 
+ });
+ 
+ 
+ /****************初始化表格信息*****************************************************/
+ 
+ 	function doInitFormData(userRole){
+	 
+	 console.log("!!!!!!!!!!!!!!!!")
+	 console.log(userRole)
+	 
+	 $("#usernameId").val(userRole.fiveUser.username);
+	 
+	 $("#passwordId").val(userRole.fiveUser.password);
+ 	
+ 		$("#emailId").val(userRole.fiveUser.email);
+ 	
+ 	$("#phoneId").val(userRole.fiveUser.phone);
+ 
+  
+ 	var roleIds=userRole.roleIds;
+ 	
+ 	
+ 	console.log(roleIds);
+ 	
+ 	for (var i = 0; i < roleIds.length; i++) {
+		
+ 		$("#rolesIds input[name='roleId']").each(function(){
+ 			console.log($(this).val());
+ 			if($(this).val()==roleIds[i]){
+ 				$(this).prop("checked",true);
+ 			}
+ 		})
+		   
+		   
+		   console.log("KHKHKHKH")
+	}
+ 	
+ 	
+ 	
+ 
+ }
+ 
+ 
+ /***************************************************************/
+ function doFindObjectById(){
+	  
+	  var url="user/doFindObjectById.do";
+	  
+	  var id= $(".container-fluid").data("id");
+	  var params={"id":id};
+	  
+	  $.post(url,params,function(result){
+		  if(result.state==1){
+			  
+			  var userRole=result.data;
+			  
+			  doInitFormData(userRole);
+		  }
+	  });
+ }
+ 
+ 
+ /**************保存用户信息****************************************/
+ function doSaveObject(){
+	 
+	 var insertUrl = "user/doSaveObjects.do"
+	 var updateUrl="user/doUpdateObject.do";
+	 
+	 var id= $(".container-fluid").data("id");
+	 
+	 var url=id?updateUrl:insertUrl;
+	 
+	 var params=getEditFormData();
+	 
+	 if(id){
+		 params.id=id;
+	 }
+	 
+	 $.post(url,params,function(result){
+		 
+		 if(result.state==1){
+			 doCancel();
+		 }else{
+			 alert(result.message)
+		 }
+	 });
+ }
+ 
+ /************获取提交的表单信息**********************************************/
+ function getEditFormData(){
+	 
+	 var params ={
+			username:$("#usernameId").val(),
+			password:$("#passwordId").val(),
+			email:$("#emailId").val(),
+			phone:$("#phoneId").val()
+	 };
+	
+	 var roleIds=[];
+	 
+	 $("#rolesIds input[type=checkbox]").each(function(){
+		 		 if($(this).prop("checked")){
+			 
+			 roleIds.push($(this).val());
+		 }
+	 });
+	 
+	params.roleIds=roleIds.toString();
+	
+	return params;
+ }
+ 
+ /******************返回页面*************************************************/
+ function doCancel(){
+	$(".container-fluid")
+	.load("user/listUI.do");
+	$(".container-fluid").removeData("id");
+ }
+ 
+ 
+ /*******************加载角色信息*********************************************/
+ function doLoadRoles(){
+	 var url="role/doFindFiveRoles.do"
+	 $.getJSON(url,function(result){
+		 if(result.state==1){
+			 
+			doInitPageRoles(result.data);
+		 }else{
+			 alert(result.message);
+		 }
+	 })
+ }
+ 
+ 
+/********************初始化角色信息DIV并将数据显示在页面****************************/
+function doInitPageRoles(data){
+	 //1.获取角色要显示的位置对象
+	 var div=$("#rolesIds");
+	 div.empty();
+	 //2.迭代数据，将数据追加到div
+	 var input="<input type='checkbox'  name='roleId' value='[id]'>[name]";
+	 
+	 
+	 for (var i = 0; i < data.length; i++) {
+		 var newInput=input.replace("[id]",data[i].id).replace("[name]",data[i].roleName);
+		 
+			div.append(newInput);
+	}
+ }
+</script>
+
+
+
+
+
+

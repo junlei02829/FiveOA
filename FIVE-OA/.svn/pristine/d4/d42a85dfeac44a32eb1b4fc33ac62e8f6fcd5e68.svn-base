@@ -1,0 +1,98 @@
+package com.five.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import com.five.common.exception.ServiceException;
+import com.five.common.vo.PageObject;
+import com.five.dao.FiveLeaveDao;
+import com.five.dao.LeaveDictionaryDao;
+import com.five.entity.FiveLeave;
+import com.five.entity.LeaveDictionary;
+import com.five.service.FiveLeaveService;
+
+/**
+ * 请假表的业务接口实现类
+ * 
+ * @author lizhichao
+ *
+ */
+@Service("fiveLeaveService")
+public class FiveLeaveServiceImpl implements FiveLeaveService {
+
+	@Autowired
+	private FiveLeaveDao fiveLeaveDao;
+	@Autowired
+	private LeaveDictionaryDao leaveDictionaryDao;
+	
+	
+	@Override
+	public List<FiveLeave> findList() {
+
+		return fiveLeaveDao.findList();
+	}
+
+	@Override
+	public PageObject<FiveLeave> findPageObjects(Integer pageCurrent, String username) {
+		
+		if(pageCurrent==null || pageCurrent<=0) {
+			throw new ServiceException("参数异常");
+		}
+		// 设置每页初始大小
+		int pageSize = 5;
+		int startIndex = (pageCurrent - 1) * pageSize;
+		int rowCount = fiveLeaveDao.getRowCount(username);
+		List<FiveLeave> list = fiveLeaveDao.findPageObjects(startIndex, pageSize, username);
+		//封装分页
+		PageObject<FiveLeave> pageObject = new PageObject<FiveLeave>();
+		pageObject.setRecords(list);
+		pageObject.setRowCount(rowCount);
+		pageObject.setPageSize(pageSize);
+		pageObject.setPageCurrent(pageCurrent);
+		return pageObject;
+	}
+
+	
+	@Override
+	public LeaveDictionary doFindLeaveDictionary(Integer id) {
+		return leaveDictionaryDao.doFindLeaveDictionary(id);
+	}
+
+	@Override
+	public int insertObject(FiveLeave entity) {
+		
+		if(StringUtils.isEmpty(entity))
+			throw new ServiceException("参数不能为空");
+		//后期获取当前登录用户
+		entity.setUsername("admin");
+		int rows = fiveLeaveDao.insertObject(entity);
+		if(rows<=0)
+			throw new ServiceException("添加失败");
+		return rows;
+	}
+
+	@Override
+	public List<LeaveDictionary> doFindLeaveDictionaryList() {
+		return leaveDictionaryDao.doFindLeaveDictionaryList();
+	}
+
+	@Override
+	public int updateObject(FiveLeave entity) {
+		if(StringUtils.isEmpty(entity))
+			throw new ServiceException("参数不能为空");
+		return fiveLeaveDao.updateObject(entity);
+	}
+
+	@Override
+	public FiveLeave doFindObjectById(Integer id) {
+		if(StringUtils.isEmpty(id))
+			throw new ServiceException("参数不能为空");
+		return fiveLeaveDao.doFindObjectById(id);
+	}
+
+	
+
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.FiveLogDao">
+	<resultMap type="com.five.entity.FiveLog" id="fiveLogs">
+	  <!-- 用户名 -->
+		<result property="username" column="username"/>
+	  <!-- 请求方法 -->
+		<result property="method" column="method"/>
+	  <!-- 请求参数 -->
+		<result property="parameter" column="parameter"/>
+	  <!-- ip地址 -->
+		<result property="ipAddress" column="ip_address"/>
+	  <!-- 删除标识（不会真删除记录，只是改个标识而已） -->
+		<result property="deleteFlag" column="delete_flag"/>
+	  <!-- 备注 -->
+		<result property="remark" column="remark"/>
+	  <!-- 创建时间 -->
+		<result property="createTime" column="create_time"/>
+	  <!-- 修改时间 -->
+		<result property="updateTime" column="update_time"/>
+	</resultMap>
+	
+	<insert id="saveLog">
+		insert into five_logs 
+		(username,method,parameter,ip_address,remark,create_time,update_time)
+		 values
+		(#{username},#{method},#{parameter},#{ipAddress},#{remark},now(),now())
+	</insert>
+ 
+    <sql id="pageWhere">
+         <where>
+           <if test="username!=null and username !=''">
+              username like concat("%",#{username},"%")
+           </if>
+         </where>
+     </sql>
+    <select id="findPageObjects" resultMap="fiveLogs">
+       select * from five_logs
+       <include refid="pageWhere"/>
+       order by create_time desc
+    </select>
+    <select id="getRowCount" resultType="int">
+           select count(*) from five_logs
+           <include refid="pageWhere"/>
+    </select>
+
+</mapper>
+
+
+

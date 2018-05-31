@@ -1,0 +1,342 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title" />
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="用户名" />
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-add">添加</button>
+							<button type="button" class="btn btn-default btn-update">修改</button>
+							<button type="button" class="btn btn-default btn-viewall">仅看启用</button>
+							<button type="button" class="btn btn-default dropdown-toggle"
+								data-toggle="dropdown">
+								输出当页<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<li><a id="exportExcel">Excel</a></li>
+								<li><a href="exportPDF">PDF</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th><input type="checkbox" id="checkAll" />全选</th>
+							<th>区域</th>
+							<th>备注</th>
+							<th>状态</th>
+							<th>创建时间</th>
+							<th>修改时间</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+					</tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix"></div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+
+<!-- 模态框 -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+	aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<!-- Horizontal Form -->
+			<div class="box box-info">
+				<div class="box-header with-border">
+					<h3 id="boxTitle" class="box-title">添加用户</h3>
+				</div>
+				<!-- /.box-header -->
+				<!-- form start -->
+				<form class="form-horizontal">
+					<div class="box-body">
+						<div class="form-group">
+							<label for="areaId" class="col-sm-2 control-label">区域</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" id="areaId">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="remarkId" class="col-sm-2 control-label">备注</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" id="remarkId">
+							</div>
+						</div>
+					</div>
+					<!-- /.box-body -->
+					<div id="saveId" class="box-footer">
+						<button type="button" class="btn btn-default btn-cancel"
+							data-dismiss="modal">取消</button>
+						<button type="button" class="btn btn-info pull-right btn-save">确定</button>
+					</div>
+					<!-- /.box-footer -->
+				</form>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal -->
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#pageId").load("pageUI.do", function() {
+			doGetObjects();
+		});
+		$(".btn-viewall").click(doGetObjects);
+		$(".input-group-btn").on("click", ".btn-search", doQueryObjects)
+							 .on("click", ".btn-add,.btn-update", doAddOrUpdate); 
+		$("tbody").on("click", ".btn-valid", doValidById);
+		$("#checkAll").change(function() {
+			doCheckAll($(this).prop("checked"));
+		});
+	});
+	function doCheckAll(state) {//dom
+		$("#tbodyId input[name='checkboxId']").prop("checked", state);
+	}
+	function getCheckedId() {
+		var array=[];
+		$("#tbodyId input[name='checkboxId']:checked").each(function(){
+			if($(this).prop("checked")){
+				array.push($(this).val())
+			}
+		});
+		return array;
+	}
+
+	function doAddOrUpdate() {
+		//1.判定点击的对象
+		var title;
+		if ($(this).hasClass("btn-add")) {
+			title = "添加区域";
+			doLoadEditPage(title);
+		} else if ($(this).hasClass("btn-update")) {
+			title = "修改区域";
+			var ids = getCheckedId();
+			console.log(ids);
+			if(ids.length==0||ids.length>1){alert("请选择一个");return;}
+			console.log("id=" + ids[0])
+			$(".container-fluid").data("id", ids[0]);
+			doLoadEditPage(title);
+		}
+	}
+
+	 function doLoadEditPage(title) {
+			if($(".container-fluid").data("id")){
+			doFindObjectById();
+			}
+		 console.log(title);
+	    $("#myModal").modal('show');
+	    $("#boxTitle").text(title);
+	}
+ 
+	function doValidById() {
+		console.log("doValidById");
+		var url = "area/doValidById.do";
+		var id = $(this).parents("tr").data("id");
+		var valid = $(this).parents("tr").data("valid");
+		var params = {
+			"id" : id,
+			"valid" : valid ? 0 : 1
+		};
+		var btn = $(this);
+		$.post(url, params, function(result) {
+			if (result.state == 1) {
+				doEditRow(btn, valid);
+			} else {
+				alert(result.message);
+			}
+		})
+	}
+	function doEditRow(obj, valid) {
+		console.log(obj);
+		//1.修改按钮上的内容
+		$(obj).html(valid ? "启用" : "禁用");
+		//2.获取当前行tr对象，然后重新绑定新的值
+		var tr = $(obj).parents("tr");
+		tr.data("valid", valid ? 0 : 1);
+		//3.修改tr中第5个td中的内容(查询API文档)
+		tr.find("td:eq(3)").text(valid ? "禁用" : "启用");
+	}
+	//处理查询按钮事件
+	function doQueryObjects() {
+		$(".pagination").data("pageCurrent", 1);
+		doGetObjects();
+	}
+
+	//页面加载完成异步加载当前页数据
+	function doGetObjects() {
+		var url = "area/doFindPageObjects.do";
+		var pageCurrent = $(".pagination").data("pageCurrent");
+		if (!pageCurrent)
+			pageCurrent = 1;
+		var params = {
+			"pageCurrent" : pageCurrent
+		}
+		params.name = $("#searchNameId").val().trim();
+		if ($(this).hasClass("btn-viewall")) {
+			params.isAll = $(".btn-viewall").text() == "仅看启用" ? true : false;
+			$(".btn-viewall").text(
+					$(".btn-viewall").text() == "仅看启用" ? "查看所有" : "仅看启用");
+		} else {
+			params.isAll = false;
+		}
+		$.getJSON(url, params, function(result) {
+			if (result.state == 1) {
+				setTableBodyRows(result.data.list);
+				setPagination(result.data);
+
+			} else {
+				alert(result.message);
+			}
+		});
+	}
+	//通过服务端返回的数据初始化页面
+	function setTableBodyRows(data) {
+		//1.获取tbody对象，并清空内容
+		var tBody = $("#tbodyId");
+		tBody.empty();
+		//2.迭代data内容将数据追加到tbody中
+		for ( var i in data) {
+			var tr = $("<tr></tr>");
+			tr.data("id", data[i].id);
+			tr.data("valid", data[i].valid);
+			var tds = "<td><input type='checkbox' name='checkboxId' value='"+data[i].id+"' ></td>"
+					+ "<td>"
+					+ data[i].areaName
+					+ "</td>"
+					+ "<td>"
+					+ (data[i].remark == null ? "无" : data[i].remark)
+					+ "</td>"
+					+ "<td>"
+					+ (data[i].deleteFlag == 1 ? "启用" : "禁用")
+					+ "</td>"
+					+ "<td>"
+					+ data[i].createTime
+					+ "</td>"
+					+ "<td>"
+					+ data[i].updateTime
+					+ "</td>"
+					+ "<td><button type='button' class='btn btn-default btn-valid'>"
+					+ (data[i].deleteFlag == 1 ? "禁用" : "启用")
+					+ "</button></td>";
+			tr.append(tds);
+			tBody.append(tr);
+		}
+	}
+</script>
+
+<script type="text/javascript">
+				$(document).ready(
+					function(){
+						//	doLoadAreas();
+				$("#saveId")
+				.on("click",".btn-cancel", doCancel)
+				.on("click",".btn-save", doSaveOrUpdate);
+				
+				var id= $(".container-fluid").data("id");
+				console.log(id);
+				if(id){ doFindObjectById }
+				
+				});
+
+				function doCancel() {
+					$('#myModal .form-group :input').val('');
+					$("#myModal").modal('hide');
+					
+					
+				}
+				function doSaveOrUpdate() {
+					var id = $(".container-fluid").data("id");
+					
+					//1.获取表单数据
+					var params = getEditFormData();
+					if (id)
+						params.id = id;
+					//2.发起异步请求
+					var insertUrl = "area/doSaveObject.do";
+					var updateUrl = "area/doUpdateObject.do";
+					var url = id?updateUrl:insertUrl;
+					$.post(url, params, function(result) {
+						if (result.state == 1) {
+							alert(result.message);
+							
+					$(".container-fluid").removeData();
+							doCancel();
+							doGetObjects();
+						} else {
+							layer(result.message);
+						}
+					})
+				}
+				
+				
+				function getEditFormData() {
+					//获取用户输入的数据
+					var params = {
+						areaName : $("#areaId").val(),
+						remark : $("#remarkId").val()
+					}
+					
+					return params;
+				}
+
+				
+				function doFindObjectById() {
+					var url = "area/doFindObjectById.do";
+					var id= $(".container-fluid").data("id");
+					console.log(id);
+					var params = {
+						"id" : id
+					}
+					$.getJSON(url, params, function(result) {
+						if (result.state == 1) {
+							doInitFormData(result.data);
+						} else {
+							alert(result.message);
+						}
+					})
+				}
+				function doInitFormData(data) {
+					//初始化用户信息 
+					$("#areaId").val(data.areaName);
+					console.log(data.remark);
+					$("#remarkId").val(data.remark);
+					
+					
+				}
+				
+			/* 	function doInitPageRoles(data) {
+					//1.获取角色要显示的位置对象
+					var div = $("#rolesId");
+					div.empty();
+					//2.迭代数据，将数据追加到div
+					var input = "<input type='checkbox' name='roleId' value='[id]'>[name]"
+					for ( var i in data) {
+						var newInput = input.replace("[id]", data[i].id)
+								.replace("[name]", data[i].name);
+						div.append(newInput)
+					}
+				} */
+				
+			</script>
+
+
+
+

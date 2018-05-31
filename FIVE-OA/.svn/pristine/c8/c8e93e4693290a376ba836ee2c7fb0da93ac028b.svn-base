@@ -1,0 +1,224 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">请假信息</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="请假人">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-add">添加申请</button>
+							<button type="button" class="btn btn-default btn-update">修改申请</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th><input type="checkbox" id="checkAll">全选</th>
+							<th>姓名</th>
+							<th>请假原因</th>
+							<th>请假内容</th>
+							<th>附件</th>
+							<th>请假开始时间</th>
+							<th>请假结束时间</th>
+							<th>请假天数</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId"></tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix">
+			</div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+   $(document).ready(function(){
+	   $("#pageId").load("pageUI.do",function(){
+		   doGetObjects();
+	   });
+	   $(".input-group-btn")
+	   .on("click",".btn-search",doQueryObjects)
+	   .on("click",".btn-add,.btn-update",doAddOrUpdate);
+	   //执行全选
+	   $("#checkAll").change(function(){
+		   doCheckAll($(this).prop("checked"));
+	   });
+	   $("tbody input[name='checkItem']").click(doChangeCheckAllState);
+	   
+   });
+   
+   //当点击列表中某一个checkbox时，修改全选状态
+   function doChangeCheckAllState(){
+	   var flag=true;
+	   $("tbody input[name='checkItem']")
+	   .each(function(){
+		   flag=flag&$(this).prop("checked");
+	   });
+	   $("#checkAll").prop("checked",flag);
+   }
+   //执行全选操作(让列表中的checkbox的状态与表头中checkbox状态一致)
+   function doCheckAll(state){//dom
+	  /*$("tbody input[name='checkItem']")
+	   .each(function(){
+		   $(this).prop("checked",state)
+	   }); */
+	   $("tbody input[name='checkItem']")
+	   .prop("checked",state);
+   }
+   function doAddOrUpdate(){
+	   //1.判定点击的对象
+	   var title;
+	   if($(this).hasClass("btn-add")){
+		   title="添加请假条";
+		   doLoadEditPage(title);
+	   }else if($(this).hasClass("btn-update")){
+		   title="修改请假条";
+		   var id=getCheckedId();
+		   if(typeof(id) == "undefined"){
+			   return;
+		   }
+		   $(".container-fluid").data("id",id);
+		   doLoadEditPage(title);
+	   }
+   }
+   function getCheckedId(){
+	   var size = $("tbody input[type='checkbox']:checked").length;
+	   if(size!=1){
+		   alert("请选择一行数据");
+		   return;
+	   }
+	   return $("tbody input[type='checkbox']:checked").val();
+   }
+   
+   function doLoadEditPage(title){
+	   var url="fiveLeave/EditUI.do"
+	   $(".container-fluid").load(url,function(){
+		   $(".box-title").html(title);
+	   }) 
+   }
+   
+   //处理查询按钮事件
+   function doQueryObjects(){
+	   $(".pagination").data("pageCurrent",1);
+	   doGetObjects();
+   }
+   //页面加载完成异步加载当前页数据
+   function doGetObjects(){
+	   var index =  layer.load(0, {content:'',shade: [0.3, '#393D49']});
+	   var url="fiveLeave/doFindPageObjects.do";
+	   var pageCurrent=
+	   $(".pagination").data("pageCurrent");
+	   if(!pageCurrent)pageCurrent=1;
+	   var params={"pageCurrent":pageCurrent}
+	   params.username=$("#searchNameId").val().trim();
+	   console.log(params);
+	   $.getJSON(url,params,function(result){
+		   if(result.state==1){
+			  setTableBodyRows(result.data.records);
+			  setPagination(result.data);
+			  layer.close(index);
+		   }else{
+			  alert(result.message);
+			  layer.close(index);
+		   }
+	   });
+   }
+   //通过服务端返回的数据初始化页面
+   function setTableBodyRows(data){
+	  //1.获取tbody对象，并清空内容
+	  var tBody=$("#tbodyId");
+	  tBody.empty();
+	  //2.迭代data内容将数据追加到tbody中
+	  for(var i in data){
+		  var tr=$("<tr></tr>");
+		  tr.data("id",data[i].id);
+		  var tds="<td><input type='checkbox' name='checkItem' value='"+data[i].id+"'></td>"+
+		     "<td>"+data[i].username+"</td>"+
+		     "<td class='leaveId'>"+doLeaveDictionary(data[i].leaveId)+"</td>"+
+		     "<td>"+data[i].leaveReason+"</td>"+
+		     "<td>"+(data[i].leaveAnnex)+"</td>"+
+		     "<td class='time'>"+data[i].leaveStartTime+"</td>"+
+		     "<td class='time'>"+data[i].leaveEndTime+"</td>"+
+		     "<td class='day'>"+(data[i].leaveEndTime-data[i].leaveStartTime)+"</td>";
+		 tr.append(tds);
+		 tBody.append(tr);
+	  }
+	  var date = $(".time");
+		date.each(function(){
+			var date = timestampToTime($(this).text());
+			$(this).text(date);
+		});
+		
+	 var day = $(".day");
+		day.each(function(){
+			var day = selectDay($(this).text());
+			if(day==0){
+				day=0.5;
+			}
+			$(this).text(day);
+	 });
+   }
+   
+ 	//转化时间格式
+	function timestampToTime(timestamp) {
+		if(timestamp == 'null'){
+			return "null";
+		}
+     var date = new Date();
+	     date.setTime(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+	     Y = date.getFullYear() + '-';
+	     M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+	     D = date.getDate() + ' ';
+	     h = date.getHours() + ':';
+	     m = date.getMinutes() + ':';
+	     s = date.getSeconds();
+	     return Y+M+D+h+m+s;
+ 	 }
+ 	
+ 	//计算时间天数
+	function selectDay(day){
+	    var day =Math.floor(day/86400000);
+	    return day;
+	} 
+ 	
+ 	//请假字典表
+ 	function doLeaveDictionary(id){
+ 		var leaveCause;
+ 		$.ajax({
+	 			url:"fiveLeave/doLeaveDictionary.do",
+	 			type:"post",
+	 			dataType:"json",
+	 			async:false, 
+	 			data:{
+	 				id:id,
+	 			},
+	 			success:function(data){
+	 				leaveCause = data.data.leaveCause;
+	 			},
+	 			error:function(data){
+	 				leaveCause = "";
+	 			}
+ 			});
+ 		return leaveCause;
+ 	}
+ 	
+ 	
+ 	
+</script>
+
+
+
+

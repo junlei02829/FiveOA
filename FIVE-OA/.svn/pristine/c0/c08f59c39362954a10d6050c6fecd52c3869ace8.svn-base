@@ -1,0 +1,141 @@
+package com.five.entity;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * 请假表的实体类
+ * 
+ * @author lizhichao
+ *
+ */
+public class FiveLeave implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4269432760232296999L;
+
+	private Integer id;// 主键id
+	private Integer leaveId;// 请假字典表id;
+	private Integer readAuthority;// 阅读权限
+	private String leaveReason;// 请假内容
+	private String leaveAnnex;// 请假附件
+	private String username;// 申请人姓名
+	private String remark;// 备注
+	private Integer deleteFlag;// 删除标识
+	private Date leaveStartTime;// 请假开始时间
+	private Date leaveEndTime;// 请假结束时间
+	private Date createTime;// 创建时间
+	private Date updateTime;// 修改时间
+
+	public FiveLeave() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public Integer getLeaveId() {
+		return leaveId;
+	}
+
+	public Integer getReadAuthority() {
+		return readAuthority;
+	}
+
+	public String getLeaveReason() {
+		return leaveReason;
+	}
+
+	public String getLeaveAnnex() {
+		return leaveAnnex;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public Integer getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public Date getLeaveStartTime() {
+		return leaveStartTime;
+	}
+
+	public Date getLeaveEndTime() {
+		return leaveEndTime;
+	}
+
+	public Date getCreateTime() {
+		return createTime;
+	}
+
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public void setLeaveId(Integer leaveId) {
+		this.leaveId = leaveId;
+	}
+
+	public void setReadAuthority(Integer readAuthority) {
+		this.readAuthority = readAuthority;
+	}
+
+	public void setLeaveReason(String leaveReason) {
+		this.leaveReason = leaveReason;
+	}
+
+	public void setLeaveAnnex(String leaveAnnex) {
+		this.leaveAnnex = leaveAnnex;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public void setDeleteFlag(Integer deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public void setLeaveStartTime(Date leaveStartTime) {
+		this.leaveStartTime = leaveStartTime;
+	}
+
+	public void setLeaveEndTime(Date leaveEndTime) {
+		this.leaveEndTime = leaveEndTime;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	@Override
+	public String toString() {
+		return "FiveLeave [id=" + id + ", leaveId=" + leaveId + ", readAuthority=" + readAuthority + ", leaveReason="
+				+ leaveReason + ", leaveAnnex=" + leaveAnnex + ", username=" + username + ", remark=" + remark
+				+ ", deleteFlag=" + deleteFlag + ", leaveStartTime=" + leaveStartTime + ", leaveEndTime=" + leaveEndTime
+				+ ", createTime=" + createTime + ", updateTime=" + updateTime + "]";
+	}
+
+}

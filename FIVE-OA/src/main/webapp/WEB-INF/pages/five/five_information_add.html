@@ -1,0 +1,172 @@
+<!-- Horizontal Form -->
+ <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">站内信</h3>
+      </div>
+      <!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal">
+        <div class="box-body">
+        <div class="form-group">
+            <label for="type" class="col-sm-2 control-label">类型</label>
+            <div class="col-sm-5">
+	            <label class="radio-inline">
+				<input class="typeRadio" type="radio" name="type" value="0" checked>私件 </label>
+				<label class="radio-inline">
+				<input class="typeRadio" type="radio" name="type" value="1">通知</label>
+            </div>
+          </div>
+          <div class="form-group info_name">
+            <label for="leaveId" class="col-sm-2 control-label">收件人</label>
+            <div class="col-sm-5">
+	              <select id="leaveId" class="form-control">
+						 <option value="0">请选择</option>
+				  </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="content" class="col-sm-2 control-label">文件内容</label>
+            <div class="col-sm-5">
+              <textarea class="form-control" rows="3" id="content"></textarea>
+            </div>
+          </div>
+         <div class="form-group">
+            <label for="remark" class="col-sm-2 control-label">备注</label>
+            <div class="col-sm-5">
+              <input id="remark" class="form-control" type="text" >
+            </div>
+          </div>
+        </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+          <button type="button" class="btn btn-default btn-cancel">Cancel</button>
+          <button type="button" class="btn btn-info pull-right btn-save">Save</button>
+        </div>
+        <!-- /.box-footer -->
+      </form>
+    </div>
+<script type="text/javascript">
+ $(document).ready(function(){
+	 doSelect();
+	 $(".box-footer")
+	 .on("click",".btn-cancel",doCancel)
+	 .on("click",".btn-save",doSaveOrUpdate);
+	 var id=$(".container-fluid").data("id");
+	 if(id)doFindObjectById(id);
+	 $(".typeRadio").click(function(){
+		 if($(this).val()==1){
+			$(".info_name").hide();
+		 }
+		 if($(this).val()==0){
+			 $(".info_name").show();
+		 }
+	 });
+	 
+ });
+
+ //查询option
+ function doSelect(){
+	 var index =  layer.load(1, {content:'',shade: [0.3, '#393D49']});
+	 $.ajax({
+			url:"fiveInformation/doUserList.do",
+			type:"post",
+			dataType:"json",
+			async:true, 
+			data:{},
+			success:function(data){
+				if(data.state==1){
+					doSeleclOption(data.data);
+					 layer.close(index);
+				}
+			},
+			error:function(data){
+				 layer.close(index);
+			}
+		});
+ }
+ 
+ function doCancel(){
+	$(".container-fluid")
+	.load("fiveInformation/doInformationUI.do");
+ }
+ function doSaveOrUpdate(){
+	 //1.获取表单数据
+	 var params=getEditFormData();
+	 //2.发起异步请求
+	 var url="fiveInformation/doSaveObject.do";
+
+	 $.post(url,params,function(result){
+		 if(result.state==1){
+			 layer.msg(result.message);
+			 doCancel();
+		 }else{
+			 layer.msg(result.message);
+		 }
+	 })
+ }
+ function getEditFormData(){
+	 //获取用户输入的数据
+	 var params={
+		receiptId:$('#leaveId option:selected').val()==0?"":$('#leaveId option:selected').val(),
+		content:$("#content").val(),
+		remark:$("#remark").val(),
+		type:$("input[name='type']:checked").val()
+	 }
+	 return params;
+ }
+ 
+ 
+ //根据id查询
+ function doFindObjectById(id){
+	 var url="fiveInformation/doFindObjectById.do";
+	 var params={"id":id}
+	 $.getJSON(url,params,function(result){
+		 if(result.state==1){
+			doInitFormData(result.data);
+		 }else{
+			 layer.msg(result.message);
+		 }
+	 })
+ }
+ 
+ function doInitFormData(data){
+	 //初始化用户信息 
+	 $("#leaveReason").val(data.leaveReason);
+	 $("#leaveStartTime").val(timestampToTime(data.leaveStartTime));
+	 $("#leaveEndTime").val(timestampToTime(data.leaveEndTime));
+	 $("#leaveAnnexName").val(data.leaveAnnexName);//附件名字
+	 $("#leaveAnnexPath").val(data.leaveAnnexPath);//附件路径
+	 
+		var leaveId = data.leaveId;
+	    var option = $('#leaveId option');
+		option.each(function(){
+			if($(this).val()==leaveId){
+				$(this).prop("selected",true);
+			}
+		})
+	if($("#leaveAnnexPath").val()!=""){
+	additionalFilesShows($("#leaveAnnexPath").val().split(","),$("#leaveAnnexName").val().split(","),1,"Annex"); 
+	}
+ }
+ 
+ 
+ function doSeleclOption(data){
+	 var div=$("#leaveId");
+	 for(var i in data){
+		 var option = "<option value='"+data[i].id+"'>"+data[i].username+"</option>";
+		 div.append(option);
+	 }
+ }
+ 
+
+
+
+
+</script>
+    
+    
+    
+    
+    
+    
+    

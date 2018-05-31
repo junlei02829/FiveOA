@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "C:\Users\000\Desktop\框架\mapper.xml提示文件/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.five.dao.FiveMenuDao">
+	
+	
+	
+	<select id="findZTreeNodes" resultType="string">
+		select menu_name from five_menus; 
+
+	</select>
+
+	
+	
+
+	
+</mapper>

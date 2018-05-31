@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.PhoneDao">
+	<select id="findObject">
+		select username from five_users
+	</select>
+
+	<insert id="insertObject">
+		insert into five_address
+		values(null,#{user_name},#{address})
+	</insert>
+	<delete id="deleteObject">
+		delete from five_address
+	</delete>
+	<select id="findPhoneByName" resultType="fivePhone">
+		SELECT
+		fu.username username,
+		fd.department_name department,
+		fa.area_name area,
+		fu.phone phone,
+		fu.email email,
+		fr.role_name role
+		FROM
+		five_users fu
+		LEFT JOIN five_address fad ON
+		fu.username=any (select fad.user_name from five_address where
+		fad.user_name=fu.username)
+		LEFT JOIN five_role fr ON
+		fr.id =any (SELECT fur.role_id FROM five_user_role fur WHERE
+		fur.user_id=fu.id)
+		LEFT JOIN
+		five_department fd ON
+		fd.id = any(SELECT fud.department_id FROM five_user_department fud WHERE
+		fud.user_id = fu.id)
+		LEFT JOIN
+		five_area fa ON
+		fa.id = any(SELECT fad.area_id FROM five_area_department fad WHERE
+		fad.department_id = fd.id)
+		WHERE
+		fad.address=#{address}
+		ORDER BY
+		username ASC
+	</select>
+	<select id="findPhones" resultType="fivePhone">
+		SELECT
+		fu.username username,
+		fd.department_name department,
+		fa.area_name area,
+		fu.phone phone,
+		fu.email email,
+		fr.role_name role
+		FROM
+		five_users fu
+		LEFT JOIN five_address fad ON
+		fu.username=any (select fad.user_name from five_address where
+		fad.user_name=fu.username)
+		LEFT JOIN five_role fr ON
+		fr.id =any (SELECT fur.role_id FROM five_user_role fur WHERE
+		fur.user_id=fu.id)
+		LEFT JOIN
+		five_department fd ON
+		fd.id = any(SELECT fud.department_id FROM five_user_department fud WHERE
+		fud.user_id = fu.id)
+		LEFT JOIN
+		five_area fa ON
+		fa.id = any(SELECT fad.area_id FROM five_area_department fad WHERE
+		fad.department_id = fd.id)
+		ORDER BY
+		username ASC
+	</select>
+
+
+</mapper>

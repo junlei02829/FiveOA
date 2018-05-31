@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "C:\Users\000\Desktop\框架\mapper.xml提示文件\mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.FiveDepartmentDao">
+
+	<!-- property是实体的属性 column是数据库表的字段 封装改变一下 -->
+
+	<resultMap type="com.five.entity.FiveEntityForZTree" id="fiveDepartment2">
+		<id property="id" column="id"></id>
+		<result property="name" column="department_name" />
+	</resultMap>
+	<!-- 查询所有部门 -->
+	<select id="getObjects" resultMap="fiveDepartment2">
+		select * from five_department
+	</select>
+</mapper>

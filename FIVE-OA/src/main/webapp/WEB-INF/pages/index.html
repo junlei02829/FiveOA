@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>欢迎使用FIVE-OA系统</title>
+<!-- Tell the browser to be responsive to screen width -->
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<link rel="shortcut icon" href="favicon.ico" />
+<link rel="stylesheet"
+	href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+<!-- Font Awesome -->
+<link rel="stylesheet"
+	href="bower_components/font-awesome/css/font-awesome.min.css">
+<!-- Ionicons -->
+<link rel="stylesheet"
+	href="bower_components/Ionicons/css/ionicons.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+<!-- AdminLTE Skins. We have chosen the skin-blue for this starter
+        page. However, you can choose any other skin. Make sure you
+        apply the skin class to the body tag so the changes take effect. -->
+<link rel="stylesheet" href="dist/css/skins/skin-purple.min.css">
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+<!-- Google Font -->
+<link rel="stylesheet"
+	href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+</head>
+<!--
+BODY TAG OPTIONS:
+=================
+Apply one or more of the following classes to get the
+desired effect
+|---------------------------------------------------------|
+| SKINS         | skin-blue                               |
+|               | skin-black                              |
+|               | skin-purple                             |
+|               | skin-yellow                             |
+|               | skin-red                                |
+|               | skin-green                              |
+|---------------------------------------------------------|
+|LAYOUT OPTIONS | fixed                                   |
+|               | layout-boxed                            |
+|               | layout-top-nav                          |
+|               | sidebar-collapse                        |
+|               | sidebar-mini                            |
+|---------------------------------------------------------|
+-->
+<body class="hold-transition skin-purple sidebar-mini">
+	<div class="wrapper">
+
+		<!-- Main Header -->
+		<header class="main-header">
+			<!-- Logo -->
+			<a id="load-start-id" class="logo"> <!-- mini logo for sidebar mini 50x50 pixels -->
+				<span class="logo-mini"><b><img src="dist/img/5OA.png"
+						height=40px "/></b></span> <!-- logo for regular state and mobile devices -->
+				<span class="logo-lg"><b><img src="dist/img/5OA.png"
+						height=40px "/>FIVE-OA系统</b></span>
+			</a>
+
+			<!-- Header Navbar -->
+			<nav class="navbar navbar-static-top" role="navigation">
+				<!-- Sidebar toggle button-->
+				<a href="#" class="sidebar-toggle" data-toggle="push-menu"
+					role="button"> <span class="sr-only">Toggle navigation</span>
+				</a>
+				<!-- Navbar Right Menu -->
+				<div class="navbar-custom-menu">
+					<ul class="nav navbar-nav">
+						<!-- Notifications Menu -->
+						<li class="dropdown notifications-menu">
+							<!-- Menu toggle button --> <a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">通知<i class="fa fa-bell-o"></i> <span
+								class="label label-warning">10</span>
+						</a>
+
+						</li>
+
+
+						<!-- Messages: style can be found in dropdown.less-->
+						<li class="dropdown messages-menu">
+							<!-- Menu toggle button --> <a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">消息 <i class="fa fa-envelope-o"></i><span
+								class="label label-success">4</span>
+						</a>
+
+						</li>
+						<!-- /.messages-menu -->
+
+
+						<!-- Tasks Menu -->
+						<li class="dropdown tasks-menu">
+							<!-- Menu Toggle Button --> <a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">流程<i class="fa fa-flag-o"></i> <span
+								class="label label-danger">9</span>
+						</a>
+				</div>
+			</nav>
+		</header>
+		<!-- Left side column. contains the logo and sidebar -->
+		<aside class="main-sidebar">
+
+			<!-- sidebar: style can be found in sidebar.less -->
+			<section class="sidebar">
+
+				<!-- Sidebar user panel (optional) -->
+				<div class="user-panel">
+					<div class="pull-left image">
+						<img src="dist/img/user2-160x160.jpg" class="img-circle" alt="用户名">
+					</div>
+					<div class="pull-left info">
+						<p id="userName"style="margin-left: 3px">用户名</p>
+						<button href="#" class="btn btn-block bg-purple btn-xs">登出</button>
+						<!-- Status -->
+					</div>
+				</div>
+
+				<!-- Sidebar Menu -->
+				<ul class="sidebar-menu" data-widget="tree">
+					<li class="header">我的OA</li>
+					<!-- Optionally, you can add icons to the links -->
+					<li class="treeview"><a href="#"><i class="fa fa-th"></i>
+							<span>人力资源</span> <span class="pull-right-container"> <i
+								class="fa fa-angle-left pull-right"></i>
+						</span> </a>
+						<ul class="treeview-menu">
+							<li><a  href="#" id="load-department-id">部门管理</a></li>
+							<li><a  href="#" id="load-area-id">区域管理</a></li>
+							<li><a  href="#" id="load-role-id">角色管理</a></li>
+							<li><a  href="#" id="load-user-id">人员管理</a></li>
+							<li><a  href="#" id="load-phone-id">通讯簿</a></li>
+						</ul></li>
+					<li class="treeview"><a href="#"><i class="fa fa-link"></i>
+							<span>请假管理</span> <span class="pull-right-container"> <i
+								class="fa fa-angle-left pull-right"></i>
+						</span> </a>
+						<ul class="treeview-menu">
+							<li><a href="#" id="load-leave-id">请假列表</a></li>
+							<li><a href="#"	 id="load-doLeaveAuthority-id">请假审批</a></li>
+						</ul></li>
+					<li class="treeview"><a href="#"><i class="fa fa-envelope"></i>
+							<span>消息查看</span><span class="pull-right-container"> <i
+								class="fa fa-angle-left pull-right"></i>
+						</span> </a>
+						<ul class="treeview-menu">
+							<li><a href="#" id="doInfoUI">公告</a></li>
+							<li><a href="#" id="load-information-id">站内信</a></li>
+						</ul></li>
+					<li><a href="#"><i class="fa fa-book"></i> <span id="log">日志查看</span></a></li>
+					 <li><a href="#" ><i class="fa fa-book"></i><span id="load-download-id">下载excel</span></a></li>
+				</ul>
+				<!-- /.sidebar-menu -->
+			</section>
+			<!-- /.sidebar -->
+		</aside>
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>
+					欢迎使用FIVE-OA系统 <small>让您的办公更便捷!</small>
+				</h1>
+				<ol class="breadcrumb">
+					<li><a> <i class="fa fa-dashboard"></i> 主页
+					</a></li>
+					<li class="active">起始页</li>
+				</ol>
+			</section>
+
+			<!-- Main content -->
+			<section class="content container-fluid">
+
+		<!------------------------
+        | Your Page Content Here |
+        ------------------------->
+
+			</section>
+			<!-- /.content -->
+		</div>
+		<!-- /.content-wrapper -->
+
+		<!-- Main Footer -->
+		<footer class="main-footer">
+			<!-- To the right -->
+			<div class="pull-right hidden-xs">我们，懂你所需！</div>
+			<!-- Default to the left -->
+			<strong><a href="#">Five Group</a> &copy; 版权所有·2018 </strong>
+		</footer>
+	</div>
+	</aside>
+	<!-- /.control-sidebar -->
+	<!-- Add the sidebar's background. This div must be placed
+  immediately after the control sidebar -->
+	<div class="control-sidebar-bg"></div>
+	</div>
+	<!-- ./wrapper -->
+
+	<!-- REQUIRED JS SCRIPTS -->
+
+	<!-- jQuery 3 -->
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/jquery/dist/jquery.min.1.9.js"></script>
+	
+	<!-- Bootstrap 3.3.7 -->
+	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script src="bower_components/layer/layer.js"></script>
+	<!-- AdminLTE App -->
+	<script src="dist/js/adminlte.min.js"></script>
+	<script src="dist/js/jquerysession.js"></script>
+	<script type="text/javascript">
+		$(function() {
+			//alert($.session.get("uid"));
+			$("#userName").text($.session.get("uid"));
+			startup();
+			$("#load-start-id,.breadcrumb li a").click(startup);
+			function startup() {
+				$(".container-fluid").load("startUI.do",function() {
+					$(".container-fluid").removeData();
+					$(".content-wrapper h1").html("欢迎使用FIVE-OA系统 <small>让您的办公更便捷!</small>");
+					$(".breadcrumb .active").text("起始页");
+				});
+			}
+			
+			
+			function doLoadUI(id,url){
+				$(id).click(function() {
+					//异步加载url对应的资源,并将资源插入到.container-fluid位置
+					//load将对应的页面加载到<section class="content container-fluid"></section>
+					$(".container-fluid").load(url,function(){
+						$(".container-fluid").removeData();
+					});
+				});
+			}
+		 	  $("#load-download-id").click(function(){
+					$(".container-fluid").load("downloadUI.do",function(){
+						$(".container-fluid").removeData();
+					})
+				});
+			 $("#load-leave-id").click(function(){
+		    	   $(".container-fluid").load("fiveLeave/LeaveUI.do",function(){
+		    		   	$(".container-fluid").removeData();
+						$(".content-wrapper h1").text("请假流程");
+						$(".breadcrumb .active").html("流程管理 ＞ 请假流程");
+		    	   });
+		     })
+			 $("#load-doLeaveAuthority-id").click(function(){
+		    	   $(".container-fluid").load("fiveLeave/doLeaveAuthority.do",function(){
+		    		   $(".container-fluid").removeData();
+		    	   });
+		     })
+			 $("#doInfoUI").click(function(){
+		    	   $(".container-fluid").load("fiveInformation/doInfoUI.do",function(){
+		    		   $(".container-fluid").removeData();
+		    	   });
+		     })
+			 $("#load-information-id").click(function(){
+	    	   $(".container-fluid").load("fiveInformation/doInformationUI.do",function(){
+	    		   $(".container-fluid").removeData();
+	    	 });
+    	 })
+			$("#load-department-id").click(function() {
+				$(".container-fluid").load("department/listUI.do", function() {
+					$(".container-fluid").removeData();
+					$(".content-wrapper h1").text("部门管理");
+					$(".breadcrumb .active").html("人力资源 ＞ 部门管理");
+				});
+			})
+			$("#load-area-id").click(function() {
+				$(".container-fluid").load("area/listUI.do", function() {
+					$(".container-fluid").removeData();
+					$(".content-wrapper h1").text("区域管理");
+					$(".breadcrumb .active").html("人力资源 ＞ 区域管理");
+				});
+			})
+			$("#load-user-id").click(function() {
+				$(".container-fluid").load("user/listUI.do", function() {
+					$(".container-fluid").removeData();
+					$(".content-wrapper h1").text("人员管理");
+					$(".breadcrumb .active").text("人力资源 ＞ 人员管理");
+				});
+			})
+			$("#load-menu-id").click(function() {
+				$(".container-fluid").load("menu/listUI.do", function() {
+					$(".container-fluid").removeData();
+					$(".content-wrapper h1").text("组织架构");
+					$(".breadcrumb .active").text("人力资源 ＞ 组织架构");
+				});
+			})
+			$("#load-role-id").click(function() {
+				$(".container-fluid").load("role/listUI.do", function() {
+					$(".container-fluid").removeData();
+					$(".content-wrapper h1").text("角色管理");
+					$(".breadcrumb .active").html("人力资源 ＞ 角色管理");
+				});
+			})
+			$("#load-phone-id").click(function() {
+				$(".container-fluid").load("five/phone.do", function() {
+					$(".container-fluid").removeData();
+					$(".content-wrapper h1").text("通讯簿");
+					$(".breadcrumb .active").html("人力资源 ＞ 通讯簿");
+				});
+			})
+		})
+		
+		   	
+  	$("#log").on("click",function(){
+ 		console.log("log");
+ 		$(".container-fluid").load("log/listUI.do");
+ 		$(".container-fluid").removeData();
+ 	});
+	</script>
+	<!-- Optionally, you can add Slimscroll and FastClick plugins.
+     Both of these plugins are recommended to enhance the
+     user experience. -->
+</body>
+</html>

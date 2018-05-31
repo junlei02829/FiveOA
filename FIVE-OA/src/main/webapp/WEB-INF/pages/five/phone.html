@@ -1,0 +1,73 @@
+<div class="box-tools">
+	<div class="input-group input-group-sm" style="width: 350px;">
+		<input type="text" name="table_search" id="searchNameId"
+			class="form-control pull-right" placeholder="员工姓名缩写"></input>
+		<div class="input-group-btn">
+			<button type="button" class="btn btn-default btn-search">
+				<i class="fa fa-search"></i>
+			</button>
+		</div>
+	</div>
+
+	<div id="all" class="box pre-scrollable pull-left"
+		style="display: inline-block; width: 50%;">
+		<ul class="list-group">
+			<li class="list-group-item bg-gray-active" style="color: #FFF">员工信息</li>
+
+		</ul>
+	</div>
+	<div id="select" class="box pre-scrollable pull-left"
+		style="display: inline-block; height: 340px; width: 50%; background-color: lightyellow">
+		<ul class="list-groups">
+
+		</ul>
+	</div>
+</div>
+<script>
+$(function(){	
+	console.log("aaaaaa")
+	LoadPage();
+$(".btn-search").click(
+		
+		function address(){
+			var params={address:$("#searchNameId").val().toUpperCase()}
+			var url="five/address.do";
+			$.post(url,params,function(result){
+				if(result.state==1){
+					$("#select").data("phones",result.data)
+					var list=result.data;
+					for(var i in list){
+						var li="<div class='box'><table class='table table-bordered'><tr><td>姓名：</td><td>"+list[i].username +"</td></tr>"
+						+"<tr><td>区域：</td><td>"+ list[i].area +"</td></tr>"
+						+"<tr><td>部门：</td><td>"+list[i].department +"</td></tr>"
+						+"<tr><td>角色：</td><td>"+list[i].role +"</td></tr>"
+						+"<tr><td>电话：</td><td>"+list[i].phone +"</td></tr>"
+						+"<tr><td>邮箱：</td><td>"+list[i].email +"</td></tr></table></div>";
+						$(".list-groups").append(li);
+					}
+				}
+			})
+		})
+});
+function LoadPage(){
+	
+	var url="five/doFindPhones.do";
+	$.post(url,function(result){
+		if(result.state==1){
+			
+			$(".list-group").data("phones",result.data)
+			$(".list-group").removeData();
+			var list=result.data;
+			console.log(result);
+			console.log(list)
+			
+			for(var i=0;i<list.length;i++){
+				var li="<li class='list-group-item' >"+list[i].username +"<small> ("+list[i].area + " "+list[i].department + " "+list[i].role+")</small></li>"
+				console.log(list[i])
+				console.log(li)
+				$(".list-group").append(li);
+			}
+		}
+	});
+}
+</script>

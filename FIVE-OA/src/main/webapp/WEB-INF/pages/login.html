@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Five-OA</title>
+<!-- Tell the browser to be responsive to screen width -->
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<link rel="shortcut icon" href="favicon.ico" />
+<!-- Bootstrap 3.3.7 -->
+<link rel="stylesheet"
+	href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+<!-- Font Awesome -->
+<link rel="stylesheet"
+	href="bower_components/font-awesome/css/font-awesome.min.css">
+<!-- Ionicons -->
+<link rel="stylesheet"
+	href="bower_components/Ionicons/css/ionicons.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+<!-- iCheck -->
+<link rel="stylesheet" href="plugins/iCheck/square/blue.css">
+<style>
+body {
+	font-family: '微软雅黑';
+}
+</style>
+</head>
+
+<body class="hold-transition login-page">
+	<canvas id="demo-canvas" style="z-index: -1; position: absolute;"></canvas>
+	<div class="login-box">
+		<div class="login-logo">
+		<img src="dist/img/5OAG.png"/><br/>
+			<a href="#"><b>欢迎使用Five-OA系统</b></a>
+		</div>
+		<!-- /.login-logo -->
+		<div class="login-box-body" style="opacity: 0.8">
+			<p class="login-box-msg" style="font-size: 20px;">登录</p>
+			<form method="post">
+				<div class="form-group has-feedback">
+					<input type="text" id="usernameId" name="username"
+						class="form-control" placeholder="用户名"> <span
+						class="glyphicon glyphicon-envelope form-control-feedback"></span>
+				</div>
+				<div class="form-group has-feedback">
+					<input type="password" id="passwordId" name="password"
+						class="form-control" placeholder="密码"> <span
+						class="glyphicon glyphicon-lock form-control-feedback"></span>
+				</div>
+				<div class="chknumber">
+					<label><input name="kaptcha" type="text" id="kaptcha" width="20px"
+						maxlength="4" class="form-control"  placeholder="验证码" />
+					</label> <img src="http://localhost/FIVE-OA/captcha-image.do"
+						width="100" height="30" align="center" id="kaptchaImage"/>
+				</div>
+
+
+				<div class="row">
+					<div class="col-xs-8">
+						<div class="checkbox icheck">
+							<label> <input type="checkbox"> 记住我
+							</label>
+						</div>
+					</div>
+					<!-- /.col -->
+					<div class="col-xs-4">
+						<button type="button"
+							class="btn btn-primary btn-block btn-flat btn-login">登录</button>
+					</div>
+					<!-- /.col -->
+				</div>
+			</form>
+		</div>
+	</div>
+	</div>
+	<!-- /.login-box -->
+</body>
+<!-- jQuery 3 -->
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- iCheck -->
+<script src="plugins/iCheck/icheck.min.js"></script>
+<script src="dist/js/TweenLite.min.js"></script>
+<script src="dist/js/EasePack.min.js"></script>
+<script src="dist/js/demo-3.js"></script>
+<script src="dist/js/jquerysession.js"></script>
+<script>
+
+	$(function() {
+		//图片验证码
+		$("#kaptchaImage").click(function(){
+		   $(this).hide().attr("src","http://localhost/FIVE-OA/captcha-image.do").fadeIn(); 
+		});
+		
+		$('input').iCheck({
+			checkboxClass : 'icheckbox_square-blue',
+			radioClass : 'iradio_square-blue',
+			increaseArea : '20%' // optional
+		});
+		
+		$(".btn").click(doLogin);
+	});
+
+	function doLogin() {
+		var params = {
+			username : $("#usernameId").val(),
+			password : $("#passwordId").val(),
+			kaptcha  : $("#kaptcha").val()
+		}
+		var url = "doLogin.do";
+		$.post(url, params, function(result) {
+			if (result.state == 1) {
+				//传uid到session
+				 $.session.set("uid", result.data.username);
+				//跳转到indexUI对应的页面
+				location.href = "indexUI.do?t="+Math.random();
+			} else {
+				$(".login-box-msg").html(result.message);
+				//登录验证失败后，页面实现自动刷新图片验证码
+				$("#kaptchaImage").hide().attr("src","http://localhost/FIVE-OA/captcha-image.do").fadeIn();
+			}
+			return false;
+		});
+	}
+</script>
+
+</html>

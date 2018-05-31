@@ -1,0 +1,23 @@
+package com.five.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.five.dao.FiveLeaveDao;
+import com.five.entity.FiveLeave;
+import com.five.service.FiveLeaveService;
+
+@Service("fiveLeaveService")
+public class FiveLeaveServiceImpl implements FiveLeaveService{
+
+	@Autowired
+	private FiveLeaveDao fiveLeaveDao;
+	@Override
+	public List<FiveLeave> findList() {
+		
+		return fiveLeaveDao.findList();
+	}
+
+}

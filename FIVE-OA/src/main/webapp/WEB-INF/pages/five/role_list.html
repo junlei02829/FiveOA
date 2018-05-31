@@ -1,0 +1,253 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">角色管理</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="角色名">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-add">添加</button>
+							<button type="button" class="btn btn-default btn-update">修改</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<form>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th><input type="checkbox" id="checkAll">全选</th>
+								<th>角色名</th>
+								<th>创建日期</th>
+								<th>最近修改日期</th>
+								<th>状态</th>
+								<th>创建人</th>
+								<th>权限设置</th>
+							</tr>
+						</thead>
+						<tbody id="tbodyId">
+						</tbody>
+					</table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix">
+				<script type="text/javascript">
+					$("#pageId").load("pageUI.do");
+				</script>
+			</div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+	$(function() {
+		//异步加载
+		doGetObjects();
+		$(".input-group-btn").on("click", ".btn-add", doAddOrUpdate)
+							 .on("click", ".btn-search", doFindFiveRoleByName)
+							 .on("click", ".btn-update", doAddOrUpdate)
+		//执行全选
+		$("#checkAll").change(function() {
+			doCheckAll($(this).prop("checked"));
+		});
+
+		//在每个权限设置上注册点击事件
+		$("tbody").on("click", ".btn-deleteFlag", doDeleteFlagById);
+
+	});
+	function doDeleteFlagById() {
+		var datas = doGetCheckedDatas();
+
+		console.log(datas.length);
+		if (datas.length != 1) {
+			alert("请选择一个");
+			return;
+		}
+		var params = {
+			id : datas[0].id
+		};
+		var deleteFlag = datas[0].deleteFlag ? 0 : 1;
+
+		params.deleteFlag = deleteFlag;
+		console.log(params);
+		var url = "role/doDeleteFlagById.do";
+		$.post(url, params, function(result) {
+			if (result.state == 1) {
+				alert(result.message);
+				doGetObjects();
+			}else{
+				alert(result.message);
+			}
+		})
+	}
+
+	function doFindFiveRoleByName() {
+		var roleName = $("#searchNameId").val();
+		var url = "role/doFindFiveRoleByName.do";
+		var pageCurrent = $(".pagination").data("pageCurrent");
+		if (!pageCurrent)
+			pageCurrent = 1;
+		var params = {
+			"pageCurrent" : pageCurrent
+		}
+		params.roleName=roleName;
+		
+		$.getJSON(url, params, function(result) {
+			setTableBodyRows(result.data.list);
+			setPagination(result.data);
+		});
+	}
+
+	//加载编辑页面
+	function doAddOrUpdate() {
+		//定义页面标题(内容可能是添加角色也可能是修改角色)
+		var title;
+		//判定要执行的操作(是添加还是修改)
+		if ($(this).hasClass("btn-add")) {
+			title = "添加角色";
+			doLoadEditPage(title);
+		} else {
+			title = "修改角色";
+			//获取当前行的id值
+			var array=doGetCheckedDatas();
+			if(array==0){
+				alert("请选择一个");
+				return;
+			}
+			var id = array[0].id;
+			//根据id查找记录，判定记录是否存在
+			var url = "role/doFindObjectById.do";
+			var data = {
+				"id" : id
+			};
+			$.getJSON(url, data, function(result) {
+				if (result.state == 1) {
+					//此位置除了要分析正确还要考虑对象不存在的情况
+					console.log(result);
+					$(".container-fluid").data("data1", result.data)
+					doLoadEditPage(title);
+				} else {
+					alert(result.message);
+				}
+			});
+		}
+	}
+	function doLoadEditPage(title) {
+		console.log("doLoadEditPage");
+		$(".container-fluid").load("role/editUI.do", function() {
+			$(".box-title").html(title);
+		});
+	}
+	//当点击列表中某一个checkbox时，修改全选状态
+	function doChangeCheckAllState() {
+		var flag = true;
+		$("tbody input[name='checkItem']").each(function() {
+			flag = flag & $(this).prop("checked");
+		});
+		$("#checkAll").prop("checked", flag);
+	}
+	//执行全选操作(让列表中的checkbox的状态与表头中checkbox状态一致)
+	function doCheckAll(state) {//dom
+		/*$("tbody input[name='checkItem']")
+		 .each(function(){
+		   $(this).prop("checked",state)
+		 }); */
+		$("tbody input[name='checkItem']").prop("checked", state);
+	}
+
+	//获取选中的id值
+	function doGetCheckedDatas() {
+		var array = [];
+		$("tbody input[name='checkItem']").each(function() {
+			if ($(this).prop("checked")) {
+				array.push($(this).parents("tr").data("data"));
+			}
+		});
+		return array;
+	}
+	function doGetObjects() {
+		$("tbody").empty();
+		//获取参数信息
+		var pageCurrent = $(".pagination").data("pageCurrent");
+		if (!pageCurrent)
+			pageCurrent = 1;
+		var params = {
+			"pageCurrent" : pageCurrent
+		}
+		var name = $("#searchNameId").val();
+		if (name)
+			params.name = name;
+		//发送异步请求
+		$.ajax({
+			url : "role/doFindPageObjects.do",
+			dataType : "json",
+			data : params,
+			success : function(result) {
+				if (result.state == 1) {
+					setTableBodyRows(result.data.list);
+					setPagination(result.data)
+				} else {
+					alert(result.message);
+				}
+			}
+		});
+	}
+	function setTableBodyRows(data) {
+		//1.获取body对象
+		var tBody = $("#tbodyId");
+		tBody.empty();
+		//2.迭代data，将data添加到Body中
+		for ( var i in data) {
+			var tr = $("<tr></tr>");
+			//tr对象上绑定一个id值(唯一标识这行记录)
+			tr.data("data", data[i]);
+			tr.data("id", data[i].id);
+			var deleteFlag = data[i].deleteFlag ? "禁用" : "启用";
+			var status = data[i].deleteFlag ? "启用" : "禁用";
+			var tds = "<td><input type='checkbox' name='checkItem' value='"+data[i].id+"'></td>"
+					+ "<td>"
+					+ data[i].roleName
+					+ "</td>"
+					+ "<td>"
+					+ data[i].createdTime
+					+ "</td>"
+					+ "<td>"
+					+ data[i].updateTime
+					+ "</td>"
+					+ "<td>"
+					+ status
+					+ "</td>"
+					+ "<td>"
+					+ data[i].createdName
+					+ "</td>"
+					+ "<td><button type='button' class='btn btn-default btn-deleteFlag'>"
+					+ deleteFlag + "</button></td>";
+			tr.append(tds);
+			tBody.append(tr);
+		}
+		//每个checkbox上注册一个click事件
+		$("tbody input[name='checkItem']").click(doChangeCheckAllState);
+
+	}
+</script>
+
+
+
+
+
+
+
+
+
+
+

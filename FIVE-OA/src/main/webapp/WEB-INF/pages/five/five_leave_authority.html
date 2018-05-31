@@ -1,0 +1,373 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">请假信息</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="请假人姓名">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th><input type="checkbox" id="checkAll">全选</th>
+							<th>姓名</th>
+							<th>请假原因</th>
+							<th>请假内容</th>
+							<th>附件</th>
+							<th>审核状态</th>
+							<th>请假开始时间</th>
+							<th>请假结束时间</th>
+							<th>请假天数</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId"></tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix">
+			</div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+
+ <!-- 驳回弹窗 -->
+    <div id="modal-demo-examine" class="modal fade middle" tabindex="-1" role="dialog"
+    aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content radius">
+          <div class="modal-header">
+            <h3 class="modal-title">请输入驳回信息</h3>
+            <a class="close" data-dismiss="modal" aria-hidden="true" href="javascript:void();">×</a>
+          </div>
+          <div class="modal-body">
+	          	<div class="row cl">
+					<label class="form-label col-xs-4 col-sm-3"><span class="c-red">&nbsp;</span>请输入驳回信息:</label>
+					<div class="form-label col-xs-10 col-sm-8">
+						<textarea id="generalSituation" style="width: 372px; height: 150px;datatype:*10-100; dragonfly:true; resize:none;" name="generalSituation" cols="" rows="" class="textarea" 
+						placeholder="请输入驳回信息..."  nullmsg="驳回信息不能为空！" 
+						onkeyup="textarealength(this,200)"></textarea>
+						<p class="textarea-numberbar" style="text-align:right"><em id="textareaCocut" class="textarea-length">0</em>/200</p>
+					</div>
+				</div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-warning radius" type="button" onclick="ex_error()">驳回</button>
+            <button class="btn" data-dismiss="modal" aria-hidden="true" onclick="closeWindow()">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+ <!-- tc end -->
+ <!-- 驳回信息 -->
+    <div id="modal-demo-remark" class="modal fade middle" tabindex="-1" role="dialog"
+    aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content radius">
+          <div class="modal-header">
+            <h3 class="modal-title">驳回信息</h3>
+            <a class="close" data-dismiss="modal" aria-hidden="true" onclick="closeRemark()" href="javascript:void();">×</a>
+          </div>
+          <div class="modal-body model_remark">
+	          	
+          </div>
+          <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true" onclick="closeRemark()" >返回</button>
+          </div>
+        </div>
+      </div>
+    </div>
+ <!-- tc end -->
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+   $(document).ready(function(){
+	   $("#pageId").load("pageUI.do",function(){
+		   doGetObjects();
+	   });
+	   $(".input-group-btn")
+	   .on("click",".btn-search",doQueryObjects);
+	 
+	   //执行全选
+	   $("#checkAll").change(function(){
+		   doCheckAll($(this).prop("checked"));
+	   });
+	  $("tbody input[name='checkItem']").click(doChangeCheckAllState);
+	   
+   });
+   //当点击列表中某一个checkbox时，修改全选状态
+   function doChangeCheckAllState(){
+	   var flag=true;
+	   $("tbody input[name='checkItem']")
+	   .each(function(){
+		   flag=flag&$(this).prop("checked");
+	   });
+	   $("#checkAll").prop("checked",flag);
+   }
+   //驳回理由弹窗
+   function showWin(id){
+	$("#modal-demo-examine").data("id",id);
+   	$("#modal-demo-examine").modal("show");
+   }
+   /*textarea 字数限制*/
+   function textarealength(obj,maxlength){
+   	var v = $(obj).val();
+   	var l = v.length;
+   	if( l > maxlength){
+   		v = v.substring(0,maxlength);
+   		$(obj).val(v);
+   	}
+   	$(obj).parent().find(".textarea-length").text(v.length);
+   }
+   
+ //驳回理由取消按钮
+  function closeWindow(){
+  	$('#generalSituation').val("");
+  	$('#textareaCocut').text("0");
+  	 $("#modal-demo-examine").modal("hide");
+  }
+ 
+//审核驳回
+  function ex_error(){
+	var id =  $("#modal-demo-examine").data("id");
+  	var generalSituation = $.trim($('#generalSituation').val());
+  	if(generalSituation.length <= 0 || generalSituation==""){
+  		layer.msg('必须输入驳回信息');
+  		return false;
+  	} 
+  	//去掉回车换行
+  	generalSituation = generalSituation.replace(/[\r\n]/g,"");
+  	$.ajax({
+		type: 'POST',
+		url: "fiveLeave/doUpdateLeaveRemark.do",
+		data:{
+			 id:id,
+			 remark:generalSituation,
+		},
+		dataType: 'json',
+		success: function(data){
+				layer.msg(data.message,{icon:1,time:1000});
+				closeWindow();
+				doGetObjects();
+		},
+		error:function(data) {
+			layer.msg('异常!',{icon:5,time:1000});
+			closeWindow();
+		},
+	});
+  	
+  }
+function showThrough(id,readAuthority){
+	var flag=1;
+	
+	if(readAuthority==3){
+		layer.msg("审核已通过,不必再操作!");flag=0;
+	}
+	if(readAuthority==0){
+		layer.msg("已驳回,不必再操作!");flag=0;
+	}
+	if(flag==0)return;
+	$.ajax({
+		type: 'POST',
+		url: "fiveLeave/doUpdateLeaveAuthority.do",
+		data:{
+			 id:id,
+		},
+		dataType: 'json',
+		success: function(data){
+				layer.msg(data.message,{icon:1,time:1000});
+				doGetObjects();
+		},
+		error:function(data) {
+			layer.msg('异常!',{icon:5,time:1000});
+		},
+	});
+}
+
+   
+   function doLoadEditPage(title){
+	   var url="fiveLeave/EditUI.do"
+	   $(".container-fluid").load(url,function(){
+		   $(".box-title").html(title);
+	   }) 
+   }
+   
+   //处理查询按钮事件
+   function doQueryObjects(){
+	   $(".pagination").data("pageCurrent",1);
+	   doGetObjects();
+   }
+   //页面加载完成异步加载当前页数据
+   function doGetObjects(){
+	   var index =  layer.load(1, {content:'',shade: [0.3, '#393D49']});
+	   var url="fiveLeave/doFindPageObjects.do";
+	   var pageCurrent=
+	   $(".pagination").data("pageCurrent");
+	   if(!pageCurrent)pageCurrent=1;
+	   var params={"pageCurrent":pageCurrent}
+	   params.username=$("#searchNameId").val().trim();
+	   console.log(params);
+	   $.getJSON(url,params,function(result){
+		   if(result.state==1){
+			  setTableBodyRows(result.data.list);
+			  setPagination(result.data);
+			  layer.close(index);
+		   }else{
+			   layer.msg(result.message);
+			  layer.close(index);
+		   }
+	   });
+   }
+   //通过服务端返回的数据初始化页面
+   function setTableBodyRows(data){
+	  //1.获取tbody对象，并清空内容
+	  var tBody=$("#tbodyId");
+	  tBody.empty();
+	  //2.迭代data内容将数据追加到tbody中
+	  for(var i in data){
+		  var tr=$("<tr></tr>");
+		  tr.data("id",data[i].id);
+		  var tds="<td><input type='checkbox' name='checkItem' value='"+data[i].id+"'></td>"+
+		     "<td>"+data[i].username+"</td>"+
+		     "<td class='leaveId'>"+doLeaveDictionary(data[i].leaveId)+"</td>"+
+		     "<td>"+data[i].leaveReason+"</td>"+
+		     "<td>"+doLeaveAnnex(data[i].leaveAnnexName,data[i].leaveAnnexPath)+"</td>"+
+		     "<td>"+doReadAuthority(data[i].readAuthority,data[i].id)+"</td>"+
+		     "<td class='time'>"+data[i].leaveStartTime+"</td>"+
+		     "<td class='time'>"+data[i].leaveEndTime+"</td>"+
+		     "<td class='day' style='text-align: center;'>"+(data[i].leaveEndTime-data[i].leaveStartTime)+"</td>"+
+			 "<td><button type='button' class='btn btn-default btn_through' onclick='showThrough("+data[i].id+","+data[i].readAuthority+")'>通过</button><button type='button' onclick='showWin("+data[i].id+")' class='btn btn-warning btn_overrule'>驳回</button></td>";
+		 tr.append(tds);
+		 tBody.append(tr);
+	  }
+	  var date = $(".time");
+		date.each(function(){
+			var date = timestampToTime($(this).text());
+			$(this).text(date);
+		});
+		
+	 var day = $(".day");
+		day.each(function(){
+			var day = selectDay($(this).text());
+			if(day==0){
+				day=0.5;
+			}
+			$(this).text(day);
+	 });
+   }
+   
+ 	//转化时间格式
+	function timestampToTime(timestamp) {
+		if(timestamp == 'null'){
+			return "null";
+		}
+     var date = new Date();
+	     date.setTime(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+	     Y = date.getFullYear() + '-';
+	     M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+	     D = date.getDate() + ' ';
+	     h = date.getHours() + ':';
+	     m = date.getMinutes() + ':';
+	     s = date.getSeconds();
+	     return Y+M+D+h+m+s;
+ 	 }
+ 	
+ 	//计算时间天数
+	function selectDay(day){
+	    var day =Math.floor(day/86400000);
+	    return day;
+	} 
+ 	
+	//请假字典表
+	function doLeaveDictionary(id){
+		var leaveCause;
+		$.ajax({
+ 			url:"fiveLeave/doLeaveDictionary.do",
+ 			type:"post",
+ 			dataType:"json",
+ 			async:false, 
+ 			data:{
+ 				id:id,
+ 			},
+ 			success:function(data){
+ 				leaveCause = data.data.leaveCause;
+ 			},
+ 			error:function(data){
+ 				leaveCause = "";
+ 			}
+			});
+		return leaveCause;
+	}
+ 	
+	//附件
+	function doLeaveAnnex(name,path){
+		if(name==""){
+			return "无";
+		}else{
+			return "<form action='upload/downloadAll.do' style='float:left;' meth='post'><input type='hidden' value='"+path+"' name='leaveAnnexPath' ><a class='btn-link' href='#' onclick='downLoad(this)' style='text-algin:center;' >下载</a></form>";
+		}
+	}
+	
+	//下载
+	function downLoad(e){
+		$(e).parent("form").submit();
+	}
+	
+	//处理审核信息
+	function doReadAuthority(auth,id){
+		if(auth==0){
+			return "<a href='#' onclick='showRemark("+id+")'>驳回</a>";
+		}else if(auth==1){
+			return "审核中";
+		}else if(auth==2){
+			return "一级审核通过二级审核中";
+		}else if(auth==3){
+			return "审核通过";
+		}else{
+			return "";
+		}
+	}
+	
+	//显示驳回信息
+	function showRemark(id){
+		$.ajax({
+				url:"fiveLeave/doFindObjectById.do",
+				type:"post",
+				dataType:"json",
+				async:false, 
+				data:{
+					id:id,
+				},
+				success:function(data){
+					$(".model_remark").text(data.data.remark);
+					$("#modal-demo-remark").modal("show");
+				},
+				error:function(data){
+					layer.msg("异常");
+				}
+			});
+		
+	}
+	//驳回理由取消按钮
+	  function closeRemark(){
+	  	$('.model_remark').text();
+	  	$("#modal-demo-remark").modal("hide");
+	  }
+</script>
+
+
+
+

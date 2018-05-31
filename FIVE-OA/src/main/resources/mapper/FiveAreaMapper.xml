@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "C:\Users\000\Desktop\框架\mapper.xml提示文件/mybatis-3-mapper.dtd">
+  <mapper namespace="com.five.dao.FiveAreaDao">
+  
+  <resultMap type="com.five.entity.FiveEntityForZTree" id="fiveEntityForZTree2">
+  	<result property="id" column="id"/>
+  	<result property="name" column="area_name"/>
+  	
+  </resultMap>
+  <select id="findAllAreas" resultMap="fiveEntityForZTree2">
+  	select * from five_area
+  </select>
+
+
+	<sql id="pageWhere">
+		<where>
+			<if test="name!=null and name !=''">
+				area_name like concat("%",#{name},"%")
+			</if>
+			<if test="isAll!=false and isAll !=''">
+				delete_flag = 1
+			</if>
+		</where>
+	</sql>
+	<resultMap type="com.five.entity.FiveArea" id="fiveArea2">
+		<id property="id" column="id" />
+		<result property="areaName" column="area_name" />
+		<result property="remark" column="remark" />
+		<result property="deleteFlag" column="delete_flag" />
+		<result property="createTime" column="create_time" />
+		<result property="updateTime" column="update_time" />
+	</resultMap>
+	
+	
+	<select id="findPageObjects" resultMap="fiveArea2">
+		select * from five_area
+		<include refid="pageWhere"></include>
+	</select>
+
+	<!-- 基于id查询 -->
+	<select id="FindObjectById" resultMap="fiveArea2">
+		select * from five_area 
+		where id=#{id}
+	</select>
+	
+	
+	<update id="validById">
+        update five_area
+        set delete_flag=#{valid}
+        where id=#{id}
+     </update>
+     
+     
+     
+     <update id="updateObject">
+		update five_area
+		<set>
+			<if test="areaName!=null and areaName!='' ">
+				area_name=#{areaName},
+			</if>
+			<if test="remark!=null and remark!='' ">
+				remark=#{remark},
+			</if>
+			update_time=now()
+		</set>
+		where id=#{id}
+	</update>
+
+	<insert id="insertObject" parameterType="fiveArea">
+		insert into
+		five_area
+		(area_name,create_time,update_time,remark)
+		values
+		(#{areaName},now(),now(),#{remark})
+	</insert>     
+     
+     
+     
+     
+  
+  
+  
+  </mapper>

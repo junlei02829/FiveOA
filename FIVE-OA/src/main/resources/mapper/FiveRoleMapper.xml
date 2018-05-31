@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "C:\Users\000\Desktop\框架\mapper.xml提示文件/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.five.dao.FiveRoleDao">
+	<!-- ******************************主要是玄今男写的，下面部分是石军磊******************** -->
+	<!-- property是实体的属性  column是数据库表的字段 封装改变一下-->
+	
+	<resultMap type="com.five.entity.FiveRole" id="fiveRole2" >
+		<id property="id" column="id"></id>
+		<result property="roleName" column="role_name" />
+		<result property="createdTime" column="create_time" />
+		<result property="updateTime" column="update_time" />
+		<result property="createdName" column="create_name" />
+		<result property="updateName" column="update_na 1`1z                                  IIIIIIme" />
+		<result property="deleteFlag" column="delete_flag" />
+		<result property="remark" column="remark" />
+	</resultMap>
+	
+	<!-- 查询 -->
+	<select id="findFiveRoleByName" resultMap="fiveRole2">
+		select * from five_role 
+		
+		<where>
+			role_name like concat("%",#{roleName},"%")
+		</where> 
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="getObjects" resultMap="fiveRole2">
+		select * from five_role
+	</select>
+	<!-- 按照id查询 -->
+	<select id="FindObjectById" resultMap="fiveRole2">
+		select * from five_role where id=#{id}
+	</select>
+	<!-- 禁用启用 -->
+	<update id="deleteFlagById">
+		update five_role set delete_flag=#{deleteFlag} 
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	<!-- 插入 -->
+	<insert id="insertFiveRole" parameterType="fiveRole" useGeneratedKeys="true" keyProperty="id">
+		insert into five_role values(null,#{roleName},#{createdTime},#{updateTime},#{createdName},#{updateName},#{deleteFlag},#{remark})
+	</insert>
+
+	<!-- 修改角色信息 -->
+	<update id="updateFiveRoleById" parameterType="fiveRole">
+		update five_role
+		<set>
+			<if test="roleName!=null and roleName!=''">
+				role_name =#{roleName},
+			</if>
+				update_time=now(),
+			
+			<if test="createdName!=null and createdName!=''">
+				create_name=#{createdName},
+			</if>
+			<if test="updateName!=null and updateName!=''">
+				update_name=#{updateName},
+			</if>
+			<if test="deleteFlag!=null and deleteFlag!=''">
+				delete_flag=#{deleteFlag},
+			</if>
+			<if test="remark!=null and remark!=''">
+				remark=#{remark},
+			</if>
+		</set>
+		where id =#{id}
+	</update>
+
+	<insert id="insetObjectsToDepartmentRole" >
+		insert into five_department_role values(null,#{departmentId},#{roleId})
+	</insert>
+	<!-- ************************************下面是石军磊写的*************************** -->
+	<!-- 查询所有角色 -->
+	<select id="findFiveRoles" resultMap="fiveRole2" >
+		select * from five_role 
+	</select>
+	
+	<!-- 插入用户角色关系 -->
+	<insert id="insertUserRoles" >
+		insert into five_user_role 
+		values(null,#{userId},#{roleIds})
+	</insert>
+</mapper>

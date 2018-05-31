@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.five.dao.FiveLeaveDao">
+
+
+	<resultMap type="com.five.entity.FiveLeave" id="fiveLeaves">
+		<id property="id" column="id" />
+		<!-- 用户名 -->
+		<result property="username" column="username" />
+		<!-- 请假字典id -->
+		<result property="leaveId" column="leave_id" />
+		<!-- 阅读权限 -->
+		<result property="readAuthority" column="read_authority" />
+		<!-- 请假内容 -->
+		<result property="leaveReason" column="leave_reason" />
+		<!-- 请假附件 -->
+		<result property="leaveAnnex" column="leave_annex" />
+		<!-- 备注 -->
+		<result property="remark" column="remark" />
+		<!--删除标识 -->
+		<result property="deleteFlag" column="delete_flag" />
+		<!-- 请假开始时间 -->
+		<result property="leaveStartTime" column="leave_start_time" />
+		<!-- 请假结束时间 -->
+		<result property="leaveEndTime" column="leave_end_time" />
+		<!-- 创建时间 -->
+		<result property="createTime" column="create_time" />
+		<!-- 修改时间 -->
+		<result property="updateTime" column="update_time" />
+	</resultMap>
+
+
+	<sql id="pageWhere">
+			<if test="username!=null and username !=''">
+				and	username like concat("%",#{username},"%")
+			</if>
+	</sql>
+	<select id="findPageObjects" resultMap="fiveLeaves">
+		select *
+		from five_leave
+		where delete_flag=1
+		<include refid="pageWhere" />
+		order by create_time desc
+		limit #{startIndex},#{pageSize}
+	</select>
+	<select id="getRowCount" resultType="int">
+		select count(*) from five_leave where delete_flag=1
+		<include refid="pageWhere" />
+	</select>
+
+	<select id="findList" resultMap="fiveLeaves">
+		select * from five_leave where delete_flag=1
+	</select>
+
+
+	<insert id="insertObject" parameterType="fiveLeave" >
+		insert into five_leave
+		(leave_id,leave_reason,leave_annex,leave_start_time,
+		leave_end_time,create_time,update_time,username,remark)
+		values
+		(#{leaveId},#{leaveReason},#{leaveAnnex},#{leaveStartTime},#{leaveEndTime},
+		now(),now(),#{username},#{remark})
+	</insert>
+
+
+	<select id="doFindObjectById" resultMap="fiveLeaves">
+		select * from five_leave where delete_flag=1 and id=#{id}
+	</select>
+
+
+	<update id="updateObject">
+		update five_leave 
+		<set>
+			<if test="leaveReason!=null and leaveReason!='' ">
+				leave_reason=#{leaveReason},
+			</if>
+			<if test="leaveAnnex!=null and leaveAnnex!='' ">
+				leave_annex=#{leaveAnnex},
+			</if>
+			<if test="leaveStartTime!=null and leaveStartTime!='' ">
+				leave_start_time=#{leaveStartTime},
+			</if>
+			<if test="leaveEndTime!=null and leaveEndTime!='' ">
+				leave_end_time=#{leaveEndTime},
+			</if>
+			<if test="username!=null and username!='' ">
+				username=#{username},
+			</if>
+			<if test="remark!=null and remark!='' ">
+				remark=#{remark},
+			</if>
+			<if test="leaveId!=null and leaveId!='' ">
+				leave_id=#{leaveId},
+			</if>
+				update_time=now()
+		</set>	
+		where id=#{id}
+	</update>
+
+</mapper>
+
+
+

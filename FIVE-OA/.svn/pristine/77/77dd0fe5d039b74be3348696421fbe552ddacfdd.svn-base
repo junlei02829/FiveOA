@@ -1,0 +1,14 @@
+package com.five.dao;
+
+import java.util.List;
+
+import com.five.entity.FiveLeave;
+
+/**
+ * 请假表的实体接口
+ * @author lizhichao
+ *
+ */
+public interface FiveLeaveDao  {
+	List<FiveLeave> findList();
+}
